@@ -18,7 +18,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { BookOpen, LineChart, Star, Users, Wallet, LayoutDashboard } from "lucide-react";
+import { BookOpen, LineChart, Plus, Star, Users, Wallet, LayoutDashboard } from "lucide-react";
 import type { CourseWithInstructor } from "@/lib/types";
 import type { LedgerSummary } from "@/lib/types";
 import { fmtMoney, fmtMoneyShort, fmtMonth, fmtNumber } from "@/lib/format";
@@ -53,16 +53,26 @@ export function InstructorDashboard() {
       title={t("instructorTitle")}
       subtitle={t("instructorSubtitle")}
       actions={
-        <Button
-          className="gap-1.5 bg-indigo-600 hover:bg-indigo-700"
-          onClick={() => {
-            setLedgerTab("overview");
-            setView("ledger");
-          }}
-        >
-          <LineChart className="h-4 w-4" />
-          {t("openLedger")}
-        </Button>
+        <div className="flex flex-wrap items-center gap-2">
+          <Button
+            variant="outline"
+            className="gap-1.5"
+            onClick={() => setView("studio")}
+          >
+            <Plus className="h-4 w-4" />
+            {t("createCourse")}
+          </Button>
+          <Button
+            className="gap-1.5 bg-indigo-600 hover:bg-indigo-700"
+            onClick={() => {
+              setLedgerTab("overview");
+              setView("ledger");
+            }}
+          >
+            <LineChart className="h-4 w-4" />
+            {t("openLedger")}
+          </Button>
+        </div>
       }
     >
       {/* stats */}

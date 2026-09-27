@@ -16,11 +16,13 @@ import {
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import {
   BookOpen,
+  CircleUserRound,
   GraduationCap,
   LayoutDashboard,
   LineChart,
   LogOut,
   Menu,
+  Plus,
   Search,
   ShieldCheck,
   ShoppingCart,
@@ -129,6 +131,9 @@ function UserMenu({ light = false }: { light?: boolean }) {
             <ShieldCheck className="h-4 w-4" /> {t("navAdmin")}
           </DropdownMenuItem>
         )}
+        <DropdownMenuItem onClick={() => setView("profile")}>
+          <CircleUserRound className="h-4 w-4" /> {t("navProfile")}
+        </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={logout} className="text-red-600 focus:text-red-600">
           <LogOut className="h-4 w-4" /> {t("logout")}
@@ -216,12 +221,14 @@ function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
     items.push({ key: "student", label: "navMyLearning", icon: GraduationCap, v: "student" });
   }
   if (user.role === "INSTRUCTOR") {
+    items.push({ key: "studio", label: "navCreateCourse", icon: Plus, v: "studio" });
     items.push({ key: "instructor", label: "navInstructor", icon: LayoutDashboard, v: "instructor" });
     items.push({ key: "ledger", label: "navLedger", icon: LineChart, v: "ledger" });
   }
   if (user.role === "ADMIN") {
     items.push({ key: "admin", label: "navAdmin", icon: ShieldCheck, v: "admin" });
   }
+  items.push({ key: "profile", label: "navProfile", icon: CircleUserRound, v: "profile" });
 
   return (
     <nav className="flex flex-1 flex-col gap-1 px-3" aria-label="Dashboard navigation">

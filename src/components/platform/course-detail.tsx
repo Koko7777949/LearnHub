@@ -6,6 +6,7 @@ import { useApp } from "@/store/app";
 import { useApi, apiPost } from "@/hooks/use-api";
 import { TopHeader, SiteFooter } from "@/components/platform/app-shell";
 import { Avatar, CourseCover, Rating, StatusBadge } from "@/components/platform/ui-bits";
+import { CourseReviews } from "@/components/platform/reviews";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -16,6 +17,7 @@ import {
   BookOpen,
   Clock,
   Globe,
+  Heart,
   Infinity as InfinityIcon,
   Loader2,
   PlayCircle,
@@ -29,7 +31,7 @@ type CourseDetail = CourseWithInstructor & { lessons: Lesson[] };
 
 export function CourseDetail() {
   const { t, lang } = useI18n();
-  const { selectedCourseId, user, requestAuthForCheckout, openCourse, setView } = useApp();
+  const { selectedCourseId, user, requestAuthForCheckout, openCourse, openLearning, setView } = useApp();
   const [purchasing, setPurchasing] = useState(false);
   const [justPurchased, setJustPurchased] = useState(false);
 
@@ -41,6 +43,30 @@ export function CourseDetail() {
   const { data: myData } = useApi<{ purchases: StudentPurchase[] }>(
     user?.role === "STUDENT" ? `/api/enrollments?studentId=${user.id}` : null,
   );
+
+  // wishlist state (students only)
+  const { data: wishData, refetch: refetchWishlist } = useApi<{ wishlist: { courseId: string }[] }>(
+    user?.role === "STUDENT" && course ? `/api/wishlist?studentId=${user.id}` : null,
+  );
+  const wished = useMemo(
+    () => !!(wishData?.wishlist || []).some((w) => w.courseId === selectedCourseId),
+    [wishData, selectedCourseId],
+  );
+
+  async function toggleWishlist() {
+    if (!user || !course) return;
+    if (user.role !== "STUDENT") return;
+    const { ok, data: resp } = await apiPost<{ wishlisted: boolean }>("/api/wishlist", {
+      studentId: user.id,
+      courseId: course.id,
+    });
+    if (ok && resp) {
+      toast.success(resp.wishlisted ? t("wishlistedToast") : t("unWishlistedToast"));
+      refetchWishlist();
+    } else {
+      toast.error(t("error"));
+    }
+  }
 
   // derived ownership: purchases list OR a just-completed purchase
   const owned = useMemo(() => {
@@ -175,20 +201,31 @@ export function CourseDetail() {
                   </AccordionTrigger>
                   <AccordionContent>
                     <ul className="divide-y divide-slate-100">
-                      {lessons.map((l) => (
-                        <li key={l.id} className="flex items-center justify-between gap-3 py-2.5 pl-8 pr-2">
-                          <span className="flex min-w-0 items-center gap-2 text-sm text-slate-700">
-                            <PlayCircle className={`h-4 w-4 shrink-0 ${l.isPreview ? "text-indigo-600" : "text-slate-300"}`} />
-                            <span className="truncate">{l.title}</span>
-                            {l.isPreview && (
-                              <span className="shrink-0 rounded bg-indigo-50 px-1.5 py-0.5 text-[10px] font-bold text-indigo-600">
-                                {t("previewLesson")}
-                              </span>
-                            )}
-                          </span>
-                          <span className="shrink-0 text-xs tabular-nums text-muted-foreground">{l.durationMinutes}m</span>
-                        </li>
-                      ))}
+                      {lessons.map((l) => {
+                        const previewable = l.isPreview;
+                        return (
+                          <li key={l.id} className="flex items-center justify-between gap-3 py-2.5 pl-8 pr-2">
+                            <button
+                              type="button"
+                              onClick={() => previewable && openLearning(course.id, l.id)}
+                              className={`flex min-w-0 items-center gap-2 text-left text-sm transition ${
+                                previewable
+                                  ? "cursor-pointer text-slate-700 hover:text-indigo-700"
+                                  : "cursor-default text-slate-500"
+                              }`}
+                            >
+                              <PlayCircle className={`h-4 w-4 shrink-0 ${previewable ? "text-indigo-600" : "text-slate-300"}`} />
+                              <span className="truncate">{l.title}</span>
+                              {previewable && (
+                                <span className="shrink-0 rounded bg-indigo-50 px-1.5 py-0.5 text-[10px] font-bold text-indigo-600">
+                                  {t("previewLesson")}
+                                </span>
+                              )}
+                            </button>
+                            <span className="shrink-0 text-xs tabular-nums text-muted-foreground">{l.durationMinutes}m</span>
+                          </li>
+                        );
+                      })}
                     </ul>
                   </AccordionContent>
                 </AccordionItem>
@@ -212,6 +249,9 @@ export function CourseDetail() {
             </div>
           </section>
 
+          {/* reviews */}
+          <CourseReviews courseId={course.id} />
+
           {/* hidden a11y duplicate of preview lesson titles */}
           <div className="sr-only" aria-label="preview lessons">
             {previewLessons.map((l) => (
@@ -231,7 +271,11 @@ export function CourseDetail() {
                     <BadgeCheck className="h-4 w-4" />
                     {t("owned")}
                   </div>
-                  <Button className="w-full bg-indigo-600 hover:bg-indigo-700" onClick={() => setView("student")}>
+                  <Button className="w-full gap-2 bg-indigo-600 hover:bg-indigo-700" onClick={() => openLearning(course.id)}>
+                    <PlayCircle className="h-4 w-4" />
+                    {t("goToLessons")}
+                  </Button>
+                  <Button variant="outline" className="w-full" onClick={() => setView("student")}>
                     {t("goToCourse")}
                   </Button>
                 </div>
@@ -258,6 +302,17 @@ export function CourseDetail() {
                     )}
                     {purchasing ? t("purchasing") : t("buyNow")}
                   </Button>
+                  {user?.role === "STUDENT" && (
+                    <Button
+                      variant="outline"
+                      size="lg"
+                      className={`w-full gap-2 ${wished ? "border-rose-300 text-rose-600 hover:bg-rose-50 hover:text-rose-700" : ""}`}
+                      onClick={toggleWishlist}
+                    >
+                      <Heart className={`h-4 w-4 ${wished ? "fill-rose-500 text-rose-500" : ""}`} />
+                      {wished ? t("removeFromWishlist") : t("addToWishlist")}
+                    </Button>
+                  )}
                   <p className="text-center text-xs text-muted-foreground">{t("loginFooterNote")}</p>
                 </div>
               )}

@@ -25,6 +25,9 @@ const daysAgo = (d: number, jitterHours = 0) => {
 
 async function main() {
   console.log("Clearing existing data...");
+  await db.wishlist.deleteMany();
+  await db.review.deleteMany();
+  await db.lessonProgress.deleteMany();
   await db.payout.deleteMany();
   await db.transaction.deleteMany();
   await db.enrollment.deleteMany();
@@ -493,15 +496,110 @@ async function main() {
   }
 
   console.log("Recalculating course stats...");
-  const allCourses = await db.course.findMany({ select: { id: true } });
+  const allCourses = await db.course.findMany({ select: { id: true, language: true } });
   for (const c of allCourses) {
     const agg = await db.enrollment.aggregate({ where: { courseId: c.id }, _count: true });
     await db.course.update({ where: { id: c.id }, data: { studentsCount: agg._count } });
   }
 
+  console.log("Creating lesson progress (consistent with enrollment progress)...");
+  const allEnrollments = await db.enrollment.findMany({
+    include: { course: { include: { lessons: { orderBy: { order: "asc" } } } } },
+  });
+  let progressRows = 0;
+  for (const e of allEnrollments) {
+    const lessons = e.course.lessons;
+    if (!lessons.length) continue;
+    const target = Math.min(lessons.length, Math.round((e.progress / 100) * lessons.length));
+    for (let i = 0; i < target; i++) {
+      await db.lessonProgress.create({
+        data: { enrollmentId: e.id, lessonId: lessons[i].id },
+      }).catch(() => {}); // unique guard
+      progressRows++;
+    }
+    // snap enrollment progress to the exact lesson-derived percent
+    const exact = Math.round((target / lessons.length) * 100);
+    if (exact !== e.progress) {
+      await db.enrollment.update({ where: { id: e.id }, data: { progress: exact } });
+    }
+  }
+  console.log(`Created ${progressRows} lesson progress rows`);
+
+  console.log("Creating reviews...");
+  const reviewTemplates = [
+    "Exactly what I needed. The instructor explains complex ideas in a way that finally clicked for me.",
+    "Great pacing and real-world examples. I shipped my first project halfway through the course.",
+    "One of the best-structured courses I've taken. Every lesson builds on the previous one.",
+    "The project work alone is worth the price. Highly recommended for anyone serious about leveling up.",
+    "Clear, concise and practical. The downloadable resources saved me hours of setup.",
+    "I was skeptical at first, but the depth here is impressive. The section on architecture is gold.",
+    "Fantastic course. I went from confused to confident in about two weeks of evening study.",
+    "Solid content with honest, battle-tested advice — not just theory from a textbook.",
+    "The instructor answers questions fast and updates the material regularly. Money well spent.",
+    "Good course overall. Some lessons could be longer, but the exercises make up for it.",
+    "The explanations are clear and the examples are realistic. Exactly the practical depth I wanted.",
+    "Landed a junior role two weeks after finishing the capstone. This course was the difference.",
+  ];
+  const reviewTemplatesZh = [
+    "讲得非常清楚，复杂的概念也能轻松理解。强烈推荐！",
+    "课程结构设计得很好，每个章节都环环相扣，收获很大。",
+    "实战性很强，跟着做完项目直接用到了公司生产环境。",
+    "老师讲解到位，配套资源也很实用，物超所值。",
+    "内容扎实，更新及时，遇到的疑问都能在课程中找到答案。",
+  ];
+  let reviewCount = 0;
+  for (const c of allCourses) {
+    const enrolled = await db.enrollment.findMany({
+      where: { courseId: c.id },
+      include: { student: true },
+      orderBy: { createdAt: "asc" },
+    });
+    // up to 5 reviews per course from enrolled students
+    const reviewers = enrolled.slice(0, 5);
+    const isZh = c.language === "中文";
+    for (const e of reviewers) {
+      if (rand() < 0.25) continue; // not everyone reviews
+      const rating = rand() < 0.82 ? pick([5, 5, 5, 4]) : 3;
+      const pool = isZh ? reviewTemplatesZh : reviewTemplates;
+      const reviewDate = new Date(e.createdAt);
+      reviewDate.setDate(reviewDate.getDate() + randInt(3, 40));
+      if (reviewDate > new Date()) reviewDate.setDate(new Date().getDate() - randInt(1, 10));
+      await db.review.create({
+        data: {
+          courseId: c.id,
+          studentId: e.student.id,
+          rating,
+          comment: pick(pool),
+          createdAt: reviewDate,
+        },
+      }).catch(() => {});
+      reviewCount++;
+    }
+  }
+  console.log(`Created ${reviewCount} reviews`);
+
+  console.log("Creating wishlists...");
+  let wishlistCount = 0;
+  for (const s of students) {
+    const enrolledCourseIds = new Set(
+      (await db.enrollment.findMany({ where: { studentId: s.id }, select: { courseId: true } })).map((e) => e.courseId),
+    );
+    const notEnrolled = courseList.filter((c) => !enrolledCourseIds.has(c.id));
+    const wishes = Math.min(notEnrolled.length, randInt(1, 3));
+    const shuffledWish = [...notEnrolled].sort(() => rand() - 0.5).slice(0, wishes);
+    for (const c of shuffledWish) {
+      await db.wishlist.create({
+        data: { studentId: s.id, courseId: c.id, createdAt: daysAgo(randInt(2, 45)) },
+      }).catch(() => {});
+      wishlistCount++;
+    }
+  }
+  console.log(`Created ${wishlistCount} wishlist items`);
+
   const userCount = await db.user.count();
   const courseCount = await db.course.count();
-  console.log(`Done. Users: ${userCount}, Courses: ${courseCount}, Transactions: ${txCount + shuffled.length}`);
+  const reviewTotal = await db.review.count();
+  console.log(`Done. Users: ${userCount}, Courses: ${courseCount}, Transactions: ${txCount + shuffled.length}, Reviews: ${reviewTotal}`);
   console.log("Demo logins: admin@learnhub.dev / sarah@learnhub.dev / diego@learnhub.dev / amina@learnhub.dev / kenji@learnhub.dev / liam@student.dev — password: demo123");
 }
 

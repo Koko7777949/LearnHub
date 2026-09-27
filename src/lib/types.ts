@@ -155,3 +155,48 @@ export interface AdminUser {
   courseCount?: number;
   enrollmentCount?: number;
 }
+
+export interface CourseReview {
+  id: string;
+  rating: number;
+  comment: string;
+  createdAt: string;
+  updatedAt: string;
+  student: { id: string; name: string; avatarColor: string; country?: string | null };
+}
+
+export interface LearningLesson extends Lesson {
+  completed: boolean;
+}
+
+export interface LearningData {
+  course: CourseWithInstructor;
+  lessons: LearningLesson[];
+  enrollment: {
+    enrollmentId: string;
+    progress: number;
+    enrolledAt: string;
+  } | null;
+  myReview?: CourseReview | null;
+}
+
+export interface WishlistEntry {
+  courseId: string;
+  createdAt: string;
+  course: CourseWithInstructor;
+}
+
+export interface ProfileStats {
+  enrollmentCount: number;
+  completedCount: number;
+  reviewCount: number;
+  wishlistCount: number;
+  courseCount: number;
+  lifetimeNet: number;
+  totalSpent: number;
+}
+
+export interface ProfileData {
+  user: SessionUser & { bio?: string | null; createdAt: string };
+  stats: ProfileStats;
+}

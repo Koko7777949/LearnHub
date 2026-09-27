@@ -3,13 +3,14 @@
 import React, { useMemo, useState } from "react";
 import { useI18n, trCategory } from "@/lib/i18n";
 import { useApp } from "@/store/app";
-import { useApi } from "@/hooks/use-api";
+import { useApi, apiPost } from "@/hooks/use-api";
 import { CourseCard } from "@/components/platform/course-card";
 import { TopHeader, SiteFooter } from "@/components/platform/app-shell";
 import { EmptyState } from "@/components/platform/ui-bits";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 import { BookOpen, Search, Sparkles, Star, Users, FilterX } from "lucide-react";
 import type { CourseWithInstructor } from "@/lib/types";
 
@@ -25,7 +26,7 @@ const SORTS = [
 
 export function Marketplace() {
   const { t, lang } = useI18n();
-  const { setView } = useApp();
+  const { user, setView } = useApp();
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("ALL");
   const [level, setLevel] = useState("ALL");
@@ -42,6 +43,26 @@ export function Marketplace() {
 
   const { data, loading } = useApi<{ courses: CourseWithInstructor[] }>(url);
   const courses = data?.courses || [];
+
+  // wishlist state for students
+  const { data: wishData, refetch: refetchWishlist } = useApi<{ wishlist: { courseId: string }[] }>(
+    user?.role === "STUDENT" ? `/api/wishlist?studentId=${user.id}` : null,
+  );
+  const wishedIds = useMemo(() => new Set((wishData?.wishlist || []).map((w) => w.courseId)), [wishData]);
+
+  async function toggleWishlist(courseId: string) {
+    if (!user) return;
+    const { ok, data: resp } = await apiPost<{ wishlisted: boolean }>("/api/wishlist", {
+      studentId: user.id,
+      courseId,
+    });
+    if (ok && resp) {
+      toast.success(resp.wishlisted ? t("wishlistedToast") : t("unWishlistedToast"));
+      refetchWishlist();
+    } else {
+      toast.error(t("error"));
+    }
+  }
 
   const totals = useMemo(() => {
     const students = courses.reduce((s, c) => s + c.studentsCount, 0);
@@ -202,7 +223,12 @@ export function Marketplace() {
           ) : (
             <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {courses.map((c) => (
-                <CourseCard key={c.id} course={c} />
+                <CourseCard
+                  key={c.id}
+                  course={c}
+                  wishlisted={wishedIds.has(c.id)}
+                  onToggleWishlist={user?.role === "STUDENT" ? toggleWishlist : undefined}
+                />
               ))}
             </div>
           )}

@@ -26,6 +26,8 @@ model User {
   instructorTransactions Transaction[] @relation("InstructorTransactions")
   studentTransactions   Transaction[] @relation("StudentTransactions")
   payouts               Payout[]
+  reviews               Review[]
+  wishlist              Wishlist[]
 }
 
 model Course {
@@ -52,27 +54,31 @@ model Course {
   lessons      Lesson[]
   enrollments  Enrollment[]
   transactions Transaction[]
+  reviews      Review[]
+  wishlistedBy Wishlist[]
 }
 
 model Lesson {
-  id              String  @id @default(cuid())
+  id              String           @id @default(cuid())
   courseId        String
-  course          Course  @relation(fields: [courseId], references: [id])
+  course          Course           @relation(fields: [courseId], references: [id])
   title           String
-  durationMinutes Int     @default(10)
-  order           Int     @default(0)
-  isPreview       Boolean @default(false)
+  durationMinutes Int              @default(10)
+  order           Int              @default(0)
+  isPreview       Boolean          @default(false)
+  progress        LessonProgress[]
 }
 
 model Enrollment {
-  id        String   @id @default(cuid())
+  id        String           @id @default(cuid())
   studentId String
   courseId  String
-  student   User     @relation(fields: [studentId], references: [id])
-  course    Course   @relation(fields: [courseId], references: [id])
+  student   User             @relation(fields: [studentId], references: [id])
+  course    Course           @relation(fields: [courseId], references: [id])
   pricePaid Float
-  progress  Float    @default(0)
-  createdAt DateTime @default(now())
+  progress  Float            @default(0)
+  createdAt DateTime         @default(now())
+  lessonProgress LessonProgress[]
 
   @@unique([studentId, courseId])
 }
@@ -106,4 +112,40 @@ model Payout {
   note         String?
   requestedAt  DateTime  @default(now())
   processedAt  DateTime?
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  courseId  String
+  course    Course   @relation(fields: [courseId], references: [id])
+  studentId String
+  student   User     @relation(fields: [studentId], references: [id])
+  rating    Int      // 1..5 stars
+  comment   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([courseId, studentId])
+}
+
+model LessonProgress {
+  id           String     @id @default(cuid())
+  enrollmentId String
+  enrollment   Enrollment @relation(fields: [enrollmentId], references: [id])
+  lessonId     String
+  lesson       Lesson     @relation(fields: [lessonId], references: [id])
+  completedAt  DateTime   @default(now())
+
+  @@unique([enrollmentId, lessonId])
+}
+
+model Wishlist {
+  id        String   @id @default(cuid())
+  studentId String
+  student   User     @relation(fields: [studentId], references: [id])
+  courseId  String
+  course    Course   @relation(fields: [courseId], references: [id])
+  createdAt DateTime @default(now())
+
+  @@unique([studentId, courseId])
 }

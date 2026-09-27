@@ -7,10 +7,13 @@ import type { SessionUser, Lang } from "@/lib/types";
 export type View =
   | "marketplace"
   | "course-detail"
+  | "player"
   | "student"
   | "instructor"
+  | "studio"
   | "ledger"
   | "admin"
+  | "profile"
   | "login";
 
 interface AppState {
@@ -18,6 +21,8 @@ interface AppState {
   lang: Lang;
   view: View;
   selectedCourseId: string | null;
+  learningCourseId: string | null;
+  learningLessonId: string | null;
   ledgerTab: string;
   adminTab: string;
   authMode: "login" | "checkout"; // why we navigated to login
@@ -27,6 +32,7 @@ interface AppState {
   setLang: (l: Lang) => void;
   setView: (v: View) => void;
   openCourse: (id: string) => void;
+  openLearning: (courseId: string, lessonId?: string) => void;
   setLedgerTab: (t: string) => void;
   setAdminTab: (t: string) => void;
   requestAuthForCheckout: (courseId: string) => void;
@@ -41,6 +47,8 @@ export const useApp = create<AppState>()(
       lang: "en",
       view: "marketplace",
       selectedCourseId: null,
+      learningCourseId: null,
+      learningLessonId: null,
       ledgerTab: "overview",
       adminTab: "overview",
       authMode: "login",
@@ -60,13 +68,23 @@ export const useApp = create<AppState>()(
       setLang: (lang) => set({ lang }),
       setView: (view) => set({ view }),
       openCourse: (id) => set({ view: "course-detail", selectedCourseId: id }),
+      openLearning: (courseId, lessonId) =>
+        set({ view: "player", learningCourseId: courseId, learningLessonId: lessonId ?? null }),
       setLedgerTab: (ledgerTab) => set({ ledgerTab }),
       setAdminTab: (adminTab) => set({ adminTab }),
       requestAuthForCheckout: (courseId) =>
         set({ view: "login", authMode: "checkout", pendingCourseId: courseId }),
       clearCheckoutIntent: () => set({ authMode: "login", pendingCourseId: null }),
       logout: () =>
-        set({ user: null, view: "marketplace", selectedCourseId: null, authMode: "login", pendingCourseId: null }),
+        set({
+          user: null,
+          view: "marketplace",
+          selectedCourseId: null,
+          learningCourseId: null,
+          learningLessonId: null,
+          authMode: "login",
+          pendingCourseId: null,
+        }),
     }),
     {
       name: "learnhub-app",

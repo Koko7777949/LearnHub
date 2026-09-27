@@ -5,8 +5,11 @@ import { useApp } from "@/store/app";
 import { LanguageProvider } from "@/lib/i18n";
 import { Marketplace } from "@/components/platform/marketplace";
 import { CourseDetail } from "@/components/platform/course-detail";
+import { CoursePlayer } from "@/components/platform/course-player";
 import { StudentDashboard } from "@/components/platform/student-dashboard";
 import { InstructorDashboard } from "@/components/platform/instructor-dashboard";
+import { InstructorStudio } from "@/components/platform/instructor-studio";
+import { ProfileView } from "@/components/platform/profile-view";
 import { RevenueLedger } from "@/components/platform/revenue-ledger";
 import { AdminPanel } from "@/components/platform/admin-panel";
 import { AuthView } from "@/components/platform/auth-view";
@@ -26,11 +29,20 @@ function AppBody() {
     case "course-detail":
       content = <CourseDetail />;
       break;
+    case "player":
+      content = <CoursePlayer />;
+      break;
     case "student":
       content = user ? <StudentDashboard /> : <AuthView />;
       break;
     case "instructor":
       content = user?.role === "INSTRUCTOR" ? <InstructorDashboard /> : <AuthView />;
+      break;
+    case "studio":
+      content = user?.role === "INSTRUCTOR" ? <InstructorStudio /> : <AuthView />;
+      break;
+    case "profile":
+      content = user ? <ProfileView /> : <AuthView />;
       break;
     case "ledger":
       content = user?.role === "INSTRUCTOR" ? <RevenueLedger /> : <AuthView />;
