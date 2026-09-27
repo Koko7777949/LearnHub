@@ -35,7 +35,12 @@ export function uploadDir(): string {
 
 export async function POST(req: NextRequest) {
   try {
-    const form = await req.formData();
+    let form: FormData;
+    try {
+      form = await req.formData();
+    } catch {
+      return NextResponse.json({ error: "BAD_FORM_DATA" }, { status: 400 });
+    }
     const file = form.get("file");
     const instructorId = String(form.get("instructorId") || "");
 
