@@ -14,6 +14,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { SearchAutocomplete } from "@/components/platform/search-autocomplete";
 import {
   BookOpen,
   CircleUserRound,
@@ -23,7 +24,6 @@ import {
   LogOut,
   Menu,
   Plus,
-  Search,
   ShieldCheck,
   ShoppingCart,
   Sparkles,
@@ -175,7 +175,6 @@ function CartButton() {
 export function TopHeader({ onSearch }: { onSearch?: (q: string) => void }) {
   const { t } = useI18n();
   const { user, setView, view } = useApp();
-  const [q, setQ] = useState("");
 
   const navBtn = (label: string, v: View, active: boolean) => (
     <button
@@ -205,28 +204,7 @@ export function TopHeader({ onSearch }: { onSearch?: (q: string) => void }) {
           )}
           {user?.role === "ADMIN" && navBtn(t("navAdmin"), "admin", view === "admin")}
         </div>
-        {onSearch ? (
-          <form
-            className="ml-auto hidden max-w-md flex-1 items-center md:flex"
-            onSubmit={(e) => {
-              e.preventDefault();
-              onSearch(q);
-            }}
-          >
-            <div className="relative w-full">
-              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-              <input
-                value={q}
-                onChange={(e) => setQ(e.target.value)}
-                placeholder={t("searchPlaceholder")}
-                className="h-10 w-full rounded-full border border-slate-200 bg-slate-50 pl-9 pr-4 text-sm outline-none transition focus:border-indigo-400 focus:bg-white focus:ring-2 focus:ring-indigo-100"
-                aria-label={t("search")}
-              />
-            </div>
-          </form>
-        ) : (
-          <div className="ml-auto" />
-        )}
+        {onSearch ? <SearchAutocomplete onSearch={onSearch} /> : <div className="ml-auto" />}
         <div className="flex items-center gap-2">
           <CartButton />
           <LangToggle />

@@ -553,6 +553,40 @@ const dict = {
   // ---------- marketplace promo strip ----------
   promoBanner: { en: "Limited offer — 25% off any course with code WELCOME25", zh: "限时优惠 — 使用优惠码 WELCOME25 全场享 75 折" },
   promoBannerCta: { en: "Shop now", zh: "立即抢购" },
+
+  // ---------- instant search / suggestions ----------
+  searchNoMatches: { en: 'No courses match "{q}"', zh: "没有匹配「{q}」的课程" },
+  searchSeeAll: { en: 'See all results for "{q}"', zh: "查看「{q}」的全部结果" },
+
+  // ---------- real video playback ----------
+  playerNoVideo: { en: "No video attached to this lesson yet — demo stage", zh: "本课时暂未挂载视频 — 演示舞台" },
+  playerVideoBadge: { en: "Lesson video", zh: "课时视频" },
+  playerVideoTag: { en: "Video", zh: "视频" },
+
+  // ---------- studio lesson video ----------
+  lessonVideoLabel: { en: "Video", zh: "视频" },
+  lessonVideoUrlPlaceholder: { en: "Paste MP4/WebM or YouTube link (optional)", zh: "粘贴 MP4/WebM 或 YouTube 链接（可选）" },
+  lessonVideoHint: {
+    en: "Attach a video to every lesson: paste any https:// link (MP4/WebM/YouTube) or upload an MP4/WebM file up to 4 MB.",
+    zh: "为每个课时挂载视频：粘贴任意 https:// 链接（MP4/WebM/YouTube），或上传不超过 4 MB 的 MP4/WebM 文件。",
+  },
+  videoUploadBtn: { en: "Upload MP4", zh: "上传 MP4" },
+  videoUploading: { en: "Uploading…", zh: "上传中…" },
+  videoAttached: { en: "Attached", zh: "已挂载" },
+  videoUploadedToast: { en: "Video uploaded — it will play in the lesson player", zh: "视频上传成功 — 将在课时播放器中播放" },
+  videoInvalidType: { en: "Only MP4, WebM or MOV videos are accepted", zh: "仅支持 MP4、WebM 或 MOV 视频格式" },
+  videoTooLarge: { en: "Video exceeds 4 MB — paste an external URL instead", zh: "视频超过 4 MB — 请改用外部链接" },
+  videoUploadFailed: { en: "Upload failed, please retry", zh: "上传失败，请重试" },
+  videoUrlInvalid: { en: "Video link must start with https://", zh: "视频链接必须以 https:// 开头" },
+
+  // ---------- Stripe checkout ----------
+  checkoutStripe: { en: "Pay with card — Stripe Checkout", zh: "银行卡支付 — Stripe 收银台" },
+  buyNowStripe: { en: "Buy now — secure Stripe payment", zh: "立即购买 — Stripe 安全支付" },
+  stripeSecureTest: {
+    en: "Secure Stripe Checkout · test mode — use card 4242 4242 4242 4242",
+    zh: "Stripe 安全收银台 · 测试模式 — 请用卡号 4242 4242 4242 4242",
+  },
+  stripeSecureLive: { en: "Payments secured by Stripe (live mode)", zh: "由 Stripe 提供安全支付（生产模式）" },
 } as const;
 
 export type DictKey = keyof typeof dict;

@@ -17,6 +17,7 @@ import {
   BookOpen,
   CircleCheck,
   Clock,
+  CreditCard,
   Globe,
   Heart,
   Infinity as InfinityIcon,
@@ -27,7 +28,7 @@ import {
   ShoppingCart,
   Users,
 } from "lucide-react";
-import type { CourseWithInstructor, Lesson, StudentPurchase } from "@/lib/types";
+import type { CourseWithInstructor, Lesson, StudentPurchase, StripeConfig, StripeCheckoutResponse } from "@/lib/types";
 
 type CourseDetail = CourseWithInstructor & { lessons: Lesson[] };
 
@@ -42,6 +43,10 @@ export function CourseDetail() {
   );
   const course = data?.course;
   const inCart = useMemo(() => !!course && cart.some((i) => i.courseId === course.id), [cart, course]);
+
+  // Stripe activation probe (falls back to demo purchase when unset)
+  const { data: stripeCfg } = useApi<StripeConfig>('/api/stripe/config');
+  const stripeEnabled = !!stripeCfg?.enabled;
 
   const { data: myData } = useApi<{ purchases: StudentPurchase[] }>(
     user?.role === "STUDENT" ? `/api/enrollments?studentId=${user.id}` : null,
@@ -86,6 +91,29 @@ export function CourseDetail() {
       return;
     }
     setPurchasing(true);
+
+    if (stripeEnabled && course.price > 0) {
+      // real Stripe Checkout for a single course
+      const { ok, data: resp } = await apiPost<StripeCheckoutResponse>("/api/stripe/checkout", {
+        studentId: user.id,
+        courseIds: [course.id],
+      });
+      if (ok && resp?.url) {
+        window.location.href = resp.url;
+        return;
+      }
+      if (ok && resp?.free) {
+        setPurchasing(false);
+        setJustPurchased(true);
+        toast.success(t("purchaseSuccess"));
+        return;
+      }
+      setPurchasing(false);
+      toast.error(t("error"));
+      return;
+    }
+
+    // demo purchase rail
     const { ok, status } = await apiPost("/api/enrollments", { studentId: user.id, courseId: course.id });
     setPurchasing(false);
     if (ok) {
@@ -300,17 +328,25 @@ export function CourseDetail() {
                   ) : null}
                   <Button
                     size="lg"
-                    className="w-full bg-indigo-600 text-base hover:bg-indigo-700"
+                    className={`w-full text-base ${stripeEnabled ? "bg-[#635bff] hover:bg-[#5851ea]" : "bg-indigo-600 hover:bg-indigo-700"}`}
                     onClick={buy}
                     disabled={purchasing || (!!user && user.role !== "STUDENT")}
                   >
                     {purchasing ? (
                       <Loader2 className="h-5 w-5 animate-spin" />
+                    ) : stripeEnabled ? (
+                      <CreditCard className="h-5 w-5" />
                     ) : (
                       <ShoppingCart className="h-5 w-5" />
                     )}
-                    {purchasing ? t("purchasing") : t("buyNow")}
+                    {purchasing ? t("purchasing") : stripeEnabled ? t("buyNowStripe") : t("buyNow")}
                   </Button>
+                  {stripeEnabled && (
+                    <p className="flex items-center justify-center gap-1.5 text-[11px] text-muted-foreground">
+                      <ShieldCheck className="h-3.5 w-3.5 text-[#635bff]" />
+                      {stripeCfg?.mode === "live" ? t("stripeSecureLive") : t("stripeSecureTest")}
+                    </p>
+                  )}
                   {!inCart ? (
                     <Button
                       variant="outline"

@@ -15,6 +15,20 @@ const round2 = (n: number) => Math.round(n * 100) / 100;
 
 const PLATFORM_FEE_RATE = 0.3;
 
+// ---------- public sample lesson videos (CC / free test assets on reliable global CDNs) ----------
+const SAMPLE_VIDEOS = [
+  "https://media.w3.org/2010/05/sintel/trailer.mp4",
+  "https://media.w3.org/2010/05/bunny/trailer.mp4",
+  "https://media.w3.org/2010/05/bunny/movie.mp4",
+  "https://media.w3.org/2010/05/video/movie_300.mp4",
+  "https://vjs.zencdn.net/v/oceans.mp4",
+  "https://mdn.github.io/shared-assets/videos/flower.mp4",
+  "https://mdn.github.io/shared-assets/videos/friday.mp4",
+  "https://test-videos.co.uk/vids/bigbuckbunny/mp4/h264/360/Big_Buck_Bunny_360_10s_1MB.mp4",
+  "https://test-videos.co.uk/vids/jellyfish/mp4/h264/360/Jellyfish_360_10s_1MB.mp4",
+  "https://test-videos.co.uk/vids/sintel/mp4/h264/360/Sintel_360_10s_1MB.mp4",
+];
+
 const daysAgo = (d: number, jitterHours = 0) => {
   const date = new Date();
   date.setDate(date.getDate() - d);
@@ -32,6 +46,7 @@ async function main() {
   await db.transaction.deleteMany();
   await db.enrollment.deleteMany();
   await db.lesson.deleteMany();
+  await db.coupon.deleteMany();
   await db.course.deleteMany();
   await db.user.deleteMany();
 
@@ -334,6 +349,7 @@ async function main() {
           durationMinutes: durationPerLesson,
           order: lessonOrder,
           isPreview: lessonOrder <= 2,
+          videoUrl: SAMPLE_VIDEOS[(lessonOrder - 1) % SAMPLE_VIDEOS.length],
         },
       });
     }
@@ -595,6 +611,35 @@ async function main() {
     }
   }
   console.log(`Created ${wishlistCount} wishlist items`);
+
+  console.log("Creating demo coupons...");
+  const sarahId = instructors["sarah@learnhub.dev"];
+  const aminaId = instructors["amina@learnhub.dev"];
+  const courseListArr = Object.entries(courseIds);
+  const couponData = [
+    { code: "WELCOME25", percentOff: 25, description: "Storewide welcome offer — 25% off any course", courseId: null, maxUses: 500, createdBy: sarahId, expiresAt: null },
+    { code: "LEARN10", percentOff: 10, description: "Storewide — 10% off your cart", courseId: null, maxUses: 300, createdBy: sarahId, expiresAt: null },
+    { code: "MLLAUNCH40", percentOff: 40, description: "ML A-Z launch promo — 40% off this course", courseId: courseListArr.find(([, v]) => v.price === 94.99)?.[0] ?? null, maxUses: 100, createdBy: instructors["diego@learnhub.dev"], expiresAt: null },
+    { code: "DESIGN15", percentOff: 15, description: "UX Design Masterclass — 15% off", courseId: courseListArr.find(([, v]) => v.price === 69.99)?.[0] ?? null, maxUses: 80, createdBy: aminaId, expiresAt: null },
+    { code: "BLACKFRIDAY50", percentOff: 50, description: "Expired Black Friday blitz", courseId: null, maxUses: 200, createdBy: sarahId, expiresAt: daysAgo(120) },
+  ];
+  for (const cp of couponData) {
+    await db.coupon.create({
+      data: {
+        code: cp.code,
+        percentOff: cp.percentOff,
+        description: cp.description,
+        courseId: cp.courseId,
+        maxUses: cp.maxUses,
+        usedCount: randInt(3, 40),
+        active: true,
+        expiresAt: cp.expiresAt,
+        createdBy: cp.createdBy,
+        createdAt: daysAgo(randInt(30, 90)),
+      },
+    }).catch(() => {});
+  }
+  console.log(`Created ${couponData.length} coupons (WELCOME25 · LEARN10 · MLLAUNCH40 · DESIGN15 · BLACKFRIDAY50-expired)`);
 
   const userCount = await db.user.count();
   const courseCount = await db.course.count();

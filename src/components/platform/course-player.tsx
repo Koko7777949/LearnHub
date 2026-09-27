@@ -11,6 +11,7 @@ import { Progress as ProgressBar } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { toast } from "sonner";
+import { toEmbedUrl } from "@/components/platform/search-autocomplete";
 import {
   ArrowLeft,
   Award,
@@ -22,12 +23,76 @@ import {
   Download,
   FileText,
   Lock,
+  MonitorPlay,
   NotebookPen,
+  PartyPopper,
   Play,
   Pause,
-  PartyPopper,
 } from "lucide-react";
 import type { LearningData, LearningLesson } from "@/lib/types";
+
+/* deterministic-ish lesson summary text */
+function VideoStage({ videoUrl, title, playing, onTogglePlay }: { videoUrl: string | null; title: string; playing: boolean; onTogglePlay: () => void }) {
+  const { t } = useI18n();
+  const embed = videoUrl ? toEmbedUrl(videoUrl) : null;
+
+  // real lesson video — MP4/WebM direct file
+  if (videoUrl && !embed) {
+    return (
+      <video
+        key={videoUrl}
+        controls
+        playsInline
+        preload="metadata"
+        src={videoUrl}
+        aria-label={title}
+        className="absolute inset-0 h-full w-full bg-black object-contain"
+      />
+    );
+  }
+
+  // real lesson video — YouTube embed
+  if (videoUrl && embed) {
+    return (
+      <iframe
+        key={embed}
+        src={embed}
+        title={title}
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        allowFullScreen
+        className="absolute inset-0 h-full w-full border-0"
+      />
+    );
+  }
+
+  // no video attached — demo placeholder
+  return (
+    <div className="flex aspect-video w-full flex-col items-center justify-center gap-4 p-6 text-center">
+      <button
+        type="button"
+        onClick={onTogglePlay}
+        className="group flex h-20 w-20 items-center justify-center rounded-full bg-white/10 backdrop-blur transition hover:scale-105 hover:bg-white/20 focus:outline-none focus-visible:ring-4 focus-visible:ring-indigo-400/50"
+        aria-label={playing ? "pause" : "play"}
+      >
+        {playing ? <Pause className="h-9 w-9 text-white" /> : <Play className="h-9 w-9 translate-x-0.5 text-white" />}
+      </button>
+      <div>
+        <p className="text-lg font-bold text-white sm:text-xl">{title}</p>
+      </div>
+      {playing && (
+        <div className="flex w-full max-w-md items-center gap-2">
+          <span className="text-[10px] font-semibold uppercase tracking-widest text-indigo-300">
+            ● REC · demo playback
+          </span>
+          <div className="h-1 flex-1 overflow-hidden rounded-full bg-white/10">
+            <div className="h-full w-1/3 animate-pulse rounded-full bg-indigo-400" />
+          </div>
+        </div>
+      )}
+      <p className="text-xs text-slate-500">{t("playerNoVideo")}</p>
+    </div>
+  );
+}
 
 /* deterministic-ish lesson summary text */
 function lessonSummary(title: string, lang: "en" | "zh") {
@@ -210,35 +275,24 @@ export function CoursePlayer() {
                 <rect width="100%" height="100%" fill="url(#playergrid)" />
               </svg>
             </div>
-            <div className="flex aspect-video w-full flex-col items-center justify-center gap-4 p-6 text-center">
-              <button
-                type="button"
-                onClick={() => setPlaying((p) => !p)}
-                className="group flex h-20 w-20 items-center justify-center rounded-full bg-white/10 backdrop-blur transition hover:scale-105 hover:bg-white/20 focus:outline-none focus-visible:ring-4 focus-visible:ring-indigo-400/50"
-                aria-label={playing ? "pause" : "play"}
-              >
-                {playing ? (
-                  <Pause className="h-9 w-9 text-white" />
-                ) : (
-                  <Play className="h-9 w-9 translate-x-0.5 text-white" />
-                )}
-              </button>
-              <div>
-                <p className="text-lg font-bold text-white sm:text-xl">
-                  {current ? current.title : course.title}
-                </p>
-                <p className="mt-1 text-sm text-slate-400">
-                  {current ? `${current.durationMinutes} ${t("lessonDuration")}` : course.subtitle}
-                </p>
-              </div>
-              {playing && (
-                <div className="flex w-full max-w-md items-center gap-2">
-                  <span className="text-[10px] font-semibold uppercase tracking-widest text-indigo-300">
-                    ● REC · demo playback
+            <div className="relative aspect-video w-full">
+              <VideoStage
+                videoUrl={current?.videoUrl ?? null}
+                title={current ? current.title : course.title}
+                playing={playing}
+                onTogglePlay={() => setPlaying((p) => !p)}
+              />
+              {!current?.videoUrl && (
+                <div className="pointer-events-none absolute inset-x-0 bottom-0 flex items-center justify-center gap-2 pb-3">
+                  <span className="rounded-full bg-black/50 px-3 py-1 text-[11px] font-medium text-slate-300 backdrop-blur">
+                    {current ? `${current.durationMinutes} ${t("lessonDuration")}` : course.subtitle}
                   </span>
-                  <div className="h-1 flex-1 overflow-hidden rounded-full bg-white/10">
-                    <div className="h-full w-1/3 animate-pulse rounded-full bg-indigo-400" />
-                  </div>
+                </div>
+              )}
+              {current?.videoUrl && (
+                <div className="pointer-events-none absolute left-3 top-3 flex items-center gap-1.5 rounded-full bg-black/50 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-white/80 backdrop-blur">
+                  <MonitorPlay className="h-3 w-3" />
+                  {t("playerVideoBadge")}
                 </div>
               )}
             </div>
@@ -528,6 +582,7 @@ function LessonList({
                 </span>
                 <span className={`block text-[11px] ${isActive ? "text-indigo-200" : "text-slate-500"}`}>
                   {l.durationMinutes} {t("lessonDuration")}
+                  {l.videoUrl ? ` · ${t("playerVideoTag")}` : ""}
                   {l.isPreview && !l.completed ? ` · ${t("previewLesson")}` : ""}
                   {!ok ? ` · ${t("playerLockedLesson")}` : ""}
                 </span>

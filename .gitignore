@@ -63,3 +63,6 @@ server.log
 # sandbox infra (not part of the LearnHub project)
 /Caddyfile
 /examples/
+# locally uploaded lesson videos (ephemeral, never commit)
+/db/uploads/
+tool-results/

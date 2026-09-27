@@ -68,6 +68,7 @@ model Lesson {
   durationMinutes Int              @default(10)
   order           Int              @default(0)
   isPreview       Boolean          @default(false)
+  videoUrl        String? // direct MP4/WebM URL, YouTube link, or /api/videos/<file> uploaded file
   progress        LessonProgress[]
 }
 

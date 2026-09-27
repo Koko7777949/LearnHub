@@ -16,12 +16,22 @@ A full-stack course marketplace with a Stripe-style instructor revenue ledger, t
 
 ### 🛒 Marketplace (Public)
 - Course catalog with search, category & level filters, sorting
+- **Instant search suggestions** — Coursera-style type-ahead: results appear as you type with highlighted matches, ratings, prices and keyboard navigation (↑/↓/Enter)
 - Course detail pages with syllabus accordion and sticky purchase card
 - Instant checkout → transactional enrollment + revenue ledger entry
 - **Shopping cart** — multi-course bulk checkout with persisted cart, order summary and coupon redemption
 - **Coupon system** — storewide & course-scoped discount codes with usage caps, expiry dates and live validation
 - **About & FAQ pages** — mission, story, values, milestones + grouped Q&A
 - Professional multi-column footer + promo banner
+
+### 💳 Payments
+- **Stripe Checkout integration** — when `STRIPE_SECRET_KEY` is set (Vercel env vars or `.env`), the cart and buy-now buttons route through Stripe's hosted checkout page with per-course line items, coupon discounts applied server-side, and idempotent post-payment fulfillment (enrollment + 70/30 ledger rows) after redirect verification
+- **Demo mode fallback** — without the key, checkout enrolls instantly with no payment, so the platform always works out of the box
+
+### 🎬 Video Lessons
+- **Real video playback** — every lesson carries a video URL rendered in an MP4/WebM `<video>` player with seek support, or a YouTube embed when a YouTube link is used
+- **MP4 uploads** — instructors attach a real video file (≤ 4 MB, MP4/WebM/MOV) to each lesson in the course studio, or paste any `https://` video link; files are served through `/api/videos/<file>` with HTTP Range support
+- **Seeded sample videos** — all 110 demo lessons ship with playable public-domain sample videos
 
 ### 🎓 Student
 - "My Learning" dashboard with course progress cards
@@ -48,7 +58,7 @@ A full-stack course marketplace with a Stripe-style instructor revenue ledger, t
 - Full **EN / 中文** language toggle (≈290 i18n keys)
 - Role-based SPA routing with auth guards
 - Responsive: desktop dashboard + mobile drawer navigation
-- **Demo coupons**: `WELCOME25` (storewide −25%) · `LEARN10` (storewide −10%) · `SARAH30` / `DIEGO20` (course-scoped) · `EXPIRED15` / `BLACKFRIDAY50` (invalid states for testing)
+- **Demo coupons**: `WELCOME25` (storewide −25%) · `LEARN10` (storewide −10%) · `MLLAUNCH40` / `DESIGN15` (course-scoped) · `BLACKFRIDAY50` (expired, for testing)
 
 ## 📸 Screenshots
 
@@ -89,6 +99,35 @@ All passwords: `demo123`
 
 One-click demo login buttons are available on the sign-in page.
 
+## 💳 Enabling Real Stripe Payments
+
+The platform ships with a complete Stripe Checkout integration that activates the
+moment a secret key exists:
+
+1. Create a Stripe account → **Developers → API keys** → copy the **secret key** (`sk_test_...`)
+2. Add it as an environment variable:
+   - **Vercel**: Project → Settings → Environment Variables → `STRIPE_SECRET_KEY` → Redeploy
+   - **Local**: put it in `.env`
+3. The cart + buy-now buttons instantly switch to Stripe's hosted checkout page
+   (line items per course, coupon discounts priced server-side), and enrollment +
+   70/30 ledger entries are written only after Stripe confirms payment on redirect.
+
+**Test card** (test mode): `4242 4242 4242 4242` · any future expiry · any CVC.
+
+Without the key, everything still works in demo mode (instant free checkout).
+Optional env vars: `STRIPE_MODE=live` (badge text) · `STRIPE_CURRENCY=eur` (default `usd`).
+
+## 🌐 Custom Domain (e.g. learnhub.com)
+
+1. Buy a domain (Namecheap / Cloudflare / GoDaddy…)
+2. Vercel dashboard → your project → **Settings → Domains → Add** → enter the domain
+   (or CLI: `vercel domains add learnhub.com` / `vercel alias set <url> learnhub.com`)
+3. At your registrar, create the DNS records Vercel shows:
+   - apex domain → `A 76.76.21.21`
+   - subdomain (www) → `CNAME cname.vercel-dns.com`
+4. Wait for the SSL certificate to issue (usually minutes) — the site then serves
+   over HTTPS from your domain.
+
 ## 🧮 Revenue Ledger Logic
 
 - **SALE** → instructor earns 70% of gross (`netEarnings`), platform keeps 30% (`platformFee`)
@@ -99,18 +138,20 @@ One-click demo login buttons are available on the sign-in page.
 ## 🗂 Project Structure
 
 ```
-prisma/schema.prisma        # User · Course · Lesson · Enrollment · Transaction · Payout
-prisma/seed.ts              # Deterministic seed (~214 txns, 6 months of history)
+prisma/schema.prisma        # User · Course · Lesson(videoUrl) · Enrollment · Transaction · Payout · Coupon
+prisma/seed.ts              # Deterministic seed (~214 txns, 6 months, sample lesson videos, coupons)
 src/
-├── app/page.tsx            # SPA entry — role-based view routing
-├── app/api/                # 9 REST routes: auth, courses, enrollments,
-│                           # ledger, payouts (+state machine), admin stats, CSV export
-├── components/platform/    # marketplace, course detail, dashboards,
-│                           # revenue-ledger, admin-panel, app shell, auth
+├── app/page.tsx            # SPA entry — role-based view routing + Stripe redirect handler
+├── app/api/                # REST routes: auth, courses, cart/checkout, coupons,
+│                           # stripe/{config,checkout,verify}, videos/{upload,[file]},
+│                           # learning, ledger, payouts, admin stats, CSV export
+├── components/platform/    # marketplace, course detail + player, dashboards,
+│                           # revenue-ledger, search-autocomplete, studio, app shell
+├── lib/enroll.ts           # shared pricing + enrollment engine (demo & Stripe rails)
 ├── lib/ledger.ts           # computeLedger(): balance, monthly buckets, per-course
 ├── lib/i18n.tsx            # EN/中文 dictionaries + LanguageProvider
 ├── lib/format.ts           # money/date formatting helpers
-└── store/app.ts            # Zustand: user · language · view · checkout intent
+└── store/app.ts            # Zustand: user · language · view · cart · checkout intent
 ```
 
 ## 🛠 Tech Stack
@@ -119,6 +160,7 @@ src/
 |-------|--------|
 | Framework | Next.js 16 (App Router) · React 19 · TypeScript |
 | Database | Prisma ORM + SQLite |
+| Payments | Stripe Checkout (optional, activates with STRIPE_SECRET_KEY) |
 | UI | Tailwind CSS 4 · shadcn/ui · lucide-react icons · sonner toasts |
 | Charts | Recharts (area · donut · bar) |
 | State | Zustand + persist |

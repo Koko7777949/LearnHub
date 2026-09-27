@@ -17,6 +17,7 @@ export interface Lesson {
   durationMinutes: number;
   order: number;
   isPreview: boolean;
+  videoUrl?: string | null;
 }
 
 export interface CourseWithInstructor {
@@ -238,4 +239,40 @@ export interface CheckoutResult {
   skippedOwned: { courseId: string; title: string }[];
   totals: { subtotal: number; discount: number; total: number };
   coupon?: { code: string; percentOff: number } | null;
+}
+
+/* ---------- Stripe ---------- */
+
+export interface StripeConfig {
+  enabled: boolean;
+  mode: "test" | "live";
+  currency: string;
+}
+
+export interface StripeCheckoutResponse {
+  url?: string;
+  sessionId?: string;
+  free?: boolean;
+  enabled?: false;
+  enrolled?: CheckoutResult["enrolled"];
+  skippedOwned?: CheckoutResult["skippedOwned"];
+  totals?: CheckoutResult["totals"];
+  coupon?: { code: string; percentOff: number } | null;
+  error?: string;
+}
+
+/* ---------- search suggestions ---------- */
+
+export interface SuggestCourse {
+  id: string;
+  title: string;
+  subtitle: string;
+  category: string;
+  level: string;
+  price: number;
+  rating: number;
+  ratingCount: number;
+  studentsCount: number;
+  coverGradient: string;
+  instructor: { id: string; name: string };
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { useApp } from "@/store/app";
 import { LanguageProvider } from "@/lib/i18n";
 import { Marketplace } from "@/components/platform/marketplace";
@@ -16,6 +16,49 @@ import { AuthView } from "@/components/platform/auth-view";
 import { CartView } from "@/components/platform/cart-view";
 import { AboutView, FaqView } from "@/components/platform/static-pages";
 import { Loader2 } from "lucide-react";
+import { toast } from "sonner";
+
+/**
+ * Stripe Checkout lands back on the SPA with ?payment=… — we can't read that
+ * inside the zustand store, so this shim component consumes the query param
+ * once on mount (cleans the URL afterwards), clears the cart and toasts.
+ */
+function StripeRedirectHandler() {
+  const { user, clearCart, setView } = useApp();
+  const handled = useRef(false);
+
+  useEffect(() => {
+    if (handled.current) return;
+    const sp = new URLSearchParams(window.location.search);
+    const payment = sp.get("payment");
+    if (!payment) return;
+    handled.current = true;
+
+    // clean the URL so refreshes don't re-trigger
+    window.history.replaceState({}, "", window.location.pathname);
+
+    const count = sp.get("count");
+    if (payment === "success") {
+      clearCart();
+      toast.success(
+        count
+          ? `Payment complete — ${count} course${count === "1" ? "" : "s"} enrolled 🎉`
+          : "Payment complete 🎉",
+      );
+      if (user) setView("student");
+    } else if (payment === "already") {
+      toast.info("All courses in this order were already enrolled.");
+      if (user) setView("student");
+    } else if (payment === "cancelled") {
+      toast.info("Checkout cancelled — your cart is saved.");
+      setView("cart");
+    } else if (payment === "error") {
+      toast.error("Payment verification failed. If you were charged, contact support.");
+    }
+  }, [user, clearCart, setView]);
+
+  return null;
+}
 
 function AppBody() {
   const { user, view, lang, setLang } = useApp();
@@ -71,6 +114,7 @@ function AppBody() {
 
   return (
     <LanguageProvider lang={lang} setLang={setLang}>
+      <StripeRedirectHandler />
       {content}
     </LanguageProvider>
   );

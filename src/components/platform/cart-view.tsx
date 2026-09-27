@@ -14,15 +14,17 @@ import {
   ArrowLeft,
   BadgeCheck,
   CircleCheck,
+  CreditCard,
   Ticket,
   Loader2,
   Lock,
+  ShieldCheck,
   ShoppingBag,
   ShoppingCart,
   Sparkles,
   Trash2,
 } from "lucide-react";
-import type { CourseWithInstructor, CouponValidation, CouponFailReason, CheckoutResult } from "@/lib/types";
+import type { CourseWithInstructor, CouponValidation, CouponFailReason, CheckoutResult, StripeConfig, StripeCheckoutResponse } from "@/lib/types";
 
 export function CartView() {
   const { t, lang } = useI18n();
@@ -32,6 +34,10 @@ export function CartView() {
   const [checkingCoupon, setCheckingCoupon] = useState(false);
   const [placing, setPlacing] = useState(false);
   const [result, setResult] = useState<CheckoutResult | null>(null);
+
+  // Stripe activation probe (falls back to demo rail when no STRIPE_SECRET_KEY)
+  const { data: stripeCfg } = useApi<StripeConfig>("/api/stripe/config");
+  const stripeEnabled = !!stripeCfg?.enabled;
 
   const cartIds = useMemo(() => cart.map((c) => c.courseId), [cart]);
 
@@ -108,6 +114,38 @@ export function CartView() {
     }
     if (!checkoutable.length) return;
     setPlacing(true);
+
+    if (stripeEnabled && totals.total > 0) {
+      // real Stripe Checkout — server prices the cart, Stripe hosts the payment page
+      const { ok, data: resp } = await apiPost<StripeCheckoutResponse>("/api/stripe/checkout", {
+        studentId: user.id,
+        courseIds: checkoutable.map((c) => c.id),
+        couponCode: applied?.valid ? applied.coupon?.code : undefined,
+      });
+      if (ok && resp?.url) {
+        window.location.href = resp.url; // redirect to Stripe hosted checkout
+        return;
+      }
+      if (ok && resp?.free) {
+        // 100%-off coupon → enrolled server-side with no charge
+        setPlacing(false);
+        setResult({
+          enrolled: resp.enrolled ?? [],
+          skippedOwned: resp.skippedOwned ?? [],
+          totals: resp.totals ?? { subtotal: 0, discount: 0, total: 0 },
+          coupon: resp.coupon ?? null,
+        });
+        clearCart();
+        clearCoupon();
+        toast.success(t("checkoutSuccessToast"));
+        return;
+      }
+      setPlacing(false);
+      toast.error(t("error"));
+      return;
+    }
+
+    // demo rail — instant enrollment, no real payment
     const { ok, data: resp } = await apiPost<CheckoutResult>("/api/cart/checkout", {
       studentId: user.id,
       courseIds: checkoutable.map((c) => c.id),
@@ -429,18 +467,29 @@ export function CartView() {
 
             <Button
               size="lg"
-              className="mt-5 w-full gap-2 bg-indigo-600 text-base hover:bg-indigo-700"
+              className={`mt-5 w-full gap-2 text-base ${stripeEnabled ? "bg-[#635bff] hover:bg-[#5851ea]" : "bg-indigo-600 hover:bg-indigo-700"}`}
               disabled={placing || !courses.length || (user?.role === "STUDENT" && !checkoutable.length)}
               onClick={checkout}
             >
-              {placing ? <Loader2 className="h-5 w-5 animate-spin" /> : <Lock className="h-4 w-4" />}
-              {placing ? t("checkoutProcessing") : t("checkout")}
+              {placing ? <Loader2 className="h-5 w-5 animate-spin" /> : stripeEnabled ? <CreditCard className="h-4 w-4" /> : <Lock className="h-4 w-4" />}
+              {placing
+                ? t("checkoutProcessing")
+                : stripeEnabled
+                  ? t("checkoutStripe")
+                  : t("checkout")}
             </Button>
 
-            <p className="mt-3 text-center text-[11px] leading-relaxed text-muted-foreground">
-              <ShoppingBag className="mr-1 inline h-3 w-3" />
-              {t("loginFooterNote")}
-            </p>
+            {stripeEnabled ? (
+              <p className="mt-3 flex items-center justify-center gap-1.5 text-[11px] leading-relaxed text-muted-foreground">
+                <ShieldCheck className="h-3.5 w-3.5 text-[#635bff]" />
+                {stripeCfg?.mode === "live" ? t("stripeSecureLive") : t("stripeSecureTest")}
+              </p>
+            ) : (
+              <p className="mt-3 text-center text-[11px] leading-relaxed text-muted-foreground">
+                <ShoppingBag className="mr-1 inline h-3 w-3" />
+                {t("loginFooterNote")}
+              </p>
+            )}
           </div>
 
           {/* trust list */}

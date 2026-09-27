@@ -3,6 +3,16 @@ import { db } from "@/lib/db";
 
 const CATEGORIES = ["Development", "Business", "Design", "Data Science", "Marketing", "IT & Software"];
 const LEVELS = ["BEGINNER", "INTERMEDIATE", "ADVANCED"];
+
+/** Accept https:// video links (MP4/WebM/YouTube) or locally uploaded /api/videos/<file> URLs. */
+function sanitizeVideoUrl(input: unknown): string | null {
+  if (typeof input !== "string") return null;
+  const url = input.trim().slice(0, 500);
+  if (!url) return null;
+  if (/^https:\/\//i.test(url)) return url; // external MP4/WebM/YouTube/Vimeo
+  if (/^\/api\/videos\/[a-f0-9-]+\.(mp4|webm|mov)$/i.test(url)) return url; // uploaded file
+  return null;
+}
 const GRADIENTS = [
   "from-indigo-500 via-violet-500 to-purple-600",
   "from-teal-400 via-cyan-500 to-sky-600",
@@ -41,9 +51,10 @@ export async function POST(req: NextRequest) {
 
     const cleanLessons = Array.isArray(lessons)
       ? lessons
-          .map((l: { title?: unknown; durationMinutes?: unknown }) => ({
+          .map((l: { title?: unknown; durationMinutes?: unknown; videoUrl?: unknown }) => ({
             title: String(l?.title ?? "").trim(),
             durationMinutes: Math.min(180, Math.max(5, Math.round(Number(l?.durationMinutes) || 15))),
+            videoUrl: sanitizeVideoUrl(l?.videoUrl),
           }))
           .filter((l: { title: string }) => l.title.length > 0)
       : [];
@@ -88,6 +99,7 @@ export async function POST(req: NextRequest) {
           durationMinutes: l.durationMinutes,
           order,
           isPreview: order <= 2,
+          videoUrl: l.videoUrl,
         },
       });
     }
