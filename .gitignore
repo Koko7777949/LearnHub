@@ -60,4 +60,6 @@ server.log
 /tests/
 /mini-services/
 /.zscripts/
-/docs/*.png.local
+# sandbox infra (not part of the LearnHub project)
+/Caddyfile
+/examples/
