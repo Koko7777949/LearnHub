@@ -13,6 +13,8 @@ import { ProfileView } from "@/components/platform/profile-view";
 import { RevenueLedger } from "@/components/platform/revenue-ledger";
 import { AdminPanel } from "@/components/platform/admin-panel";
 import { AuthView } from "@/components/platform/auth-view";
+import { CartView } from "@/components/platform/cart-view";
+import { AboutView, FaqView } from "@/components/platform/static-pages";
 import { Loader2 } from "lucide-react";
 
 function AppBody() {
@@ -22,6 +24,15 @@ function AppBody() {
   switch (view) {
     case "login":
       content = <AuthView />;
+      break;
+    case "cart":
+      content = <CartView />;
+      break;
+    case "about":
+      content = <AboutView />;
+      break;
+    case "faq":
+      content = <FaqView />;
       break;
     case "marketplace":
       content = <Marketplace />;

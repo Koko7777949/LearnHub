@@ -15,6 +15,7 @@ import {
   ArrowLeft,
   BadgeCheck,
   BookOpen,
+  CircleCheck,
   Clock,
   Globe,
   Heart,
@@ -22,6 +23,7 @@ import {
   Loader2,
   PlayCircle,
   ShieldCheck,
+  ShoppingBag,
   ShoppingCart,
   Users,
 } from "lucide-react";
@@ -31,7 +33,7 @@ type CourseDetail = CourseWithInstructor & { lessons: Lesson[] };
 
 export function CourseDetail() {
   const { t, lang } = useI18n();
-  const { selectedCourseId, user, requestAuthForCheckout, openCourse, openLearning, setView } = useApp();
+  const { selectedCourseId, user, requestAuthForCheckout, openCourse, openLearning, setView, cart, addToCart } = useApp();
   const [purchasing, setPurchasing] = useState(false);
   const [justPurchased, setJustPurchased] = useState(false);
 
@@ -39,6 +41,7 @@ export function CourseDetail() {
     selectedCourseId ? `/api/courses/${selectedCourseId}` : null,
   );
   const course = data?.course;
+  const inCart = useMemo(() => !!course && cart.some((i) => i.courseId === course.id), [cart, course]);
 
   const { data: myData } = useApi<{ purchases: StudentPurchase[] }>(
     user?.role === "STUDENT" ? `/api/enrollments?studentId=${user.id}` : null,
@@ -94,6 +97,12 @@ export function CourseDetail() {
     } else {
       toast.error(t("error"));
     }
+  }
+
+  function addCourseToCart() {
+    if (!course) return;
+    const added = addToCart(course.id);
+    toast.success(added ? t("addedToCartToast") : t("alreadyInCartToast"));
   }
 
   if (loading || !course) {
@@ -302,6 +311,27 @@ export function CourseDetail() {
                     )}
                     {purchasing ? t("purchasing") : t("buyNow")}
                   </Button>
+                  {!inCart ? (
+                    <Button
+                      variant="outline"
+                      size="lg"
+                      className="w-full gap-2 border-indigo-200 text-indigo-700 hover:bg-indigo-50"
+                      onClick={addCourseToCart}
+                    >
+                      <ShoppingBag className="h-4 w-4" />
+                      {t("addToCart")}
+                    </Button>
+                  ) : (
+                    <Button
+                      variant="outline"
+                      size="lg"
+                      className="w-full gap-2 border-emerald-300 bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
+                      onClick={() => setView("cart")}
+                    >
+                      <CircleCheck className="h-4 w-4" />
+                      {t("inCartGoToCart")}
+                    </Button>
+                  )}
                   {user?.role === "STUDENT" && (
                     <Button
                       variant="outline"

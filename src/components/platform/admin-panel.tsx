@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { CouponManager } from "@/components/platform/coupon-manager";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
@@ -111,6 +112,9 @@ export function AdminPanel() {
           </TabsTrigger>
           <TabsTrigger value="courses" className="flex-1 data-[state=active]:bg-white data-[state=active]:shadow-sm">
             {t("adminTabCourses")}
+          </TabsTrigger>
+          <TabsTrigger value="coupons" className="flex-1 data-[state=active]:bg-white data-[state=active]:shadow-sm">
+            {t("adminTabCoupons")}
           </TabsTrigger>
         </TabsList>
 
@@ -540,6 +544,13 @@ export function AdminPanel() {
                 </TableBody>
               </Table>
             </div>
+          </div>
+        )}
+
+        {/* ============ COUPONS ============ */}
+        {adminTab === "coupons" && (
+          <div className="mt-5">
+            <CouponManager role="ADMIN" />
           </div>
         )}
       </Tabs>

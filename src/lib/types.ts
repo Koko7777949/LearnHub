@@ -200,3 +200,42 @@ export interface ProfileData {
   user: SessionUser & { bio?: string | null; createdAt: string };
   stats: ProfileStats;
 }
+
+/* ---------- coupons & cart ---------- */
+
+export interface Coupon {
+  id: string;
+  code: string;
+  percentOff: number;
+  description?: string | null;
+  courseId?: string | null;
+  course?: { id: string; title: string } | null;
+  maxUses: number;
+  usedCount: number;
+  active: boolean;
+  expiresAt?: string | null;
+  createdAt: string;
+  creator: { id: string; name: string; avatarColor: string };
+}
+
+export type CouponFailReason = "NOT_FOUND" | "INACTIVE" | "EXPIRED" | "MAX_USES" | "NOT_APPLICABLE";
+
+export interface CouponValidation {
+  valid: boolean;
+  reason?: CouponFailReason;
+  coupon?: {
+    code: string;
+    percentOff: number;
+    description?: string | null;
+    scopeCourseTitle?: string | null;
+  };
+  items?: { courseId: string; originalPrice: number; discountAmount: number }[];
+  totalDiscount?: number;
+}
+
+export interface CheckoutResult {
+  enrolled: { courseId: string; title: string; fullPrice: number; pricePaid: number }[];
+  skippedOwned: { courseId: string; title: string }[];
+  totals: { subtotal: number; discount: number; total: number };
+  coupon?: { code: string; percentOff: number } | null;
+}

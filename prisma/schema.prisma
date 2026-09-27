@@ -28,6 +28,7 @@ model User {
   payouts               Payout[]
   reviews               Review[]
   wishlist              Wishlist[]
+  couponsCreated        Coupon[]       @relation("CreatedCoupons")
 }
 
 model Course {
@@ -56,6 +57,7 @@ model Course {
   transactions Transaction[]
   reviews      Review[]
   wishlistedBy Wishlist[]
+  coupons      Coupon[]      @relation("CourseCoupons")
 }
 
 model Lesson {
@@ -148,4 +150,22 @@ model Wishlist {
   createdAt DateTime @default(now())
 
   @@unique([studentId, courseId])
+}
+
+model Coupon {
+  id          String    @id @default(cuid())
+  code        String    @unique // stored uppercase
+  percentOff  Int // 5..100 (%)
+  description String?
+  courseId    String? // null = applies to the whole store
+  course      Course?   @relation("CourseCoupons", fields: [courseId], references: [id])
+  createdBy   String
+  creator     User      @relation("CreatedCoupons", fields: [createdBy], references: [id])
+  maxUses     Int       @default(100)
+  usedCount   Int       @default(0)
+  active      Boolean   @default(true)
+  expiresAt   DateTime? // null = never expires
+  createdAt   DateTime  @default(now())
+
+  @@index([code])
 }

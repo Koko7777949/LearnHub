@@ -7,12 +7,17 @@ export async function GET(req: NextRequest) {
   const category = sp.get("category");
   const level = sp.get("level");
   const instructorId = sp.get("instructorId");
+  const ids = sp.get("ids");
   const sort = sp.get("sort") || "popular";
 
   const where: Record<string, unknown> = { status: "PUBLISHED" };
   if (category && category !== "ALL") where.category = category;
   if (level && level !== "ALL") where.level = level;
   if (instructorId) where.instructorId = instructorId;
+  if (ids) {
+    const idList = ids.split(",").map((s) => s.trim()).filter(Boolean);
+    if (idList.length) where.id = { in: idList };
+  }
   if (search) {
     where.OR = [
       { title: { contains: search } },

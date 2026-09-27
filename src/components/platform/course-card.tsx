@@ -7,7 +7,8 @@ import { CourseCover, Rating, CourseMeta, LevelBadge } from "@/components/platfo
 import { Badge } from "@/components/ui/badge";
 import { Avatar } from "@/components/platform/ui-bits";
 import type { CourseWithInstructor } from "@/lib/types";
-import { Heart, Users } from "lucide-react";
+import { CircleCheck, Heart, ShoppingCart, Users } from "lucide-react";
+import { toast } from "sonner";
 
 export function CourseCard({
   course,
@@ -19,8 +20,15 @@ export function CourseCard({
   onToggleWishlist?: (courseId: string) => void;
 }) {
   const { t, lang } = useI18n();
-  const { openCourse } = useApp();
+  const { openCourse, cart, addToCart, setView } = useApp();
   const isBestseller = course.ratingCount > 1500;
+  const inCart = cart.some((i) => i.courseId === course.id);
+
+  function quickAddToCart() {
+    const added = addToCart(course.id);
+    toast.success(added ? t("addedToCartToast") : t("alreadyInCartToast"));
+    if (!added) setView("cart");
+  }
 
   return (
     <div className="group relative h-full">
@@ -55,7 +63,25 @@ export function CourseCard({
           <CourseMeta lessons={course.lessonsCount} minutes={course.durationMinutes} />
           <div className="mt-auto flex items-center justify-between pt-4">
             <span className="text-lg font-bold text-slate-900">${course.price.toFixed(2)}</span>
-            <Avatar name={course.instructor.name} color={course.instructor.avatarColor} size="sm" />
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  quickAddToCart();
+                }}
+                aria-label={inCart ? t("inCartGoToCart") : t("addToCart")}
+                title={inCart ? t("inCartGoToCart") : t("addToCart")}
+                className={`flex h-8 w-8 items-center justify-center rounded-full border transition hover:scale-110 ${
+                  inCart
+                    ? "border-emerald-300 bg-emerald-50 text-emerald-600"
+                    : "border-slate-200 bg-white text-slate-500 hover:border-indigo-300 hover:text-indigo-600"
+                }`}
+              >
+                {inCart ? <CircleCheck className="h-4 w-4" /> : <ShoppingCart className="h-4 w-4" />}
+              </button>
+              <Avatar name={course.instructor.name} color={course.instructor.avatarColor} size="sm" />
+            </div>
           </div>
         </div>
       </button>

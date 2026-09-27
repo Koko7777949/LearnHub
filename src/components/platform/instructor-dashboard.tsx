@@ -6,6 +6,7 @@ import { useApp } from "@/store/app";
 import { useApi } from "@/hooks/use-api";
 import { DashboardShell } from "@/components/platform/app-shell";
 import { CourseCover, EmptyState, LevelBadge, Rating, StatCard, StatusBadge } from "@/components/platform/ui-bits";
+import { CouponManager } from "@/components/platform/coupon-manager";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -246,6 +247,11 @@ export function InstructorDashboard() {
             </div>
           )}
         </div>
+      </section>
+
+      {/* my coupons */}
+      <section className="mt-6 rounded-2xl border bg-white p-4 shadow-sm sm:p-5" aria-label={t("couponsTitle")}>
+        <CouponManager role="INSTRUCTOR" />
       </section>
     </DashboardShell>
   );

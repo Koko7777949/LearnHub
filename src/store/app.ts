@@ -14,7 +14,15 @@ export type View =
   | "ledger"
   | "admin"
   | "profile"
+  | "cart"
+  | "about"
+  | "faq"
   | "login";
+
+export interface CartItem {
+  courseId: string;
+  addedAt: number;
+}
 
 interface AppState {
   user: SessionUser | null;
@@ -27,6 +35,7 @@ interface AppState {
   adminTab: string;
   authMode: "login" | "checkout"; // why we navigated to login
   pendingCourseId: string | null; // course to buy after login
+  cart: CartItem[];
 
   setUser: (u: SessionUser | null) => void;
   setLang: (l: Lang) => void;
@@ -37,6 +46,9 @@ interface AppState {
   setAdminTab: (t: string) => void;
   requestAuthForCheckout: (courseId: string) => void;
   clearCheckoutIntent: () => void;
+  addToCart: (courseId: string) => boolean;
+  removeFromCart: (courseId: string) => void;
+  clearCart: () => void;
   logout: () => void;
 }
 
@@ -53,6 +65,7 @@ export const useApp = create<AppState>()(
       adminTab: "overview",
       authMode: "login",
       pendingCourseId: null,
+      cart: [],
 
       setUser: (u) =>
         set({
@@ -75,6 +88,17 @@ export const useApp = create<AppState>()(
       requestAuthForCheckout: (courseId) =>
         set({ view: "login", authMode: "checkout", pendingCourseId: courseId }),
       clearCheckoutIntent: () => set({ authMode: "login", pendingCourseId: null }),
+      addToCart: (courseId) => {
+        let added = false;
+        set((s) => {
+          if (s.cart.some((i) => i.courseId === courseId)) return s;
+          added = true;
+          return { cart: [...s.cart, { courseId, addedAt: Date.now() }] };
+        });
+        return added;
+      },
+      removeFromCart: (courseId) => set((s) => ({ cart: s.cart.filter((i) => i.courseId !== courseId) })),
+      clearCart: () => set({ cart: [] }),
       logout: () =>
         set({
           user: null,
@@ -88,7 +112,7 @@ export const useApp = create<AppState>()(
     }),
     {
       name: "learnhub-app",
-      partialize: (s) => ({ user: s.user, lang: s.lang }),
+      partialize: (s) => ({ user: s.user, lang: s.lang, cart: s.cart }),
     },
   ),
 );

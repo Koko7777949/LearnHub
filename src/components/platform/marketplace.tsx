@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { BookOpen, Search, Sparkles, Star, Users, FilterX } from "lucide-react";
+import { BookOpen, Search, Sparkles, Star, Tag, Users, FilterX } from "lucide-react";
 import type { CourseWithInstructor } from "@/lib/types";
 
 const CATEGORIES = ["ALL", "Development", "Design", "Data Science", "IT & Software", "Marketing", "Business"];
@@ -115,6 +115,21 @@ export function Marketplace() {
           </div>
         </div>
       </section>
+
+      {/* promo strip */}
+      <div className="border-b border-indigo-100 bg-gradient-to-r from-indigo-600 to-violet-600">
+        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-center gap-x-3 gap-y-1 px-4 py-2.5 text-center sm:px-6 lg:px-8">
+          <Tag className="h-3.5 w-3.5 shrink-0 text-amber-300" />
+          <p className="text-xs font-semibold text-white sm:text-sm">{t("promoBanner")}</p>
+          <button
+            type="button"
+            onClick={() => setView("cart")}
+            className="rounded-full bg-white/15 px-2.5 py-0.5 text-[11px] font-bold text-white backdrop-blur transition hover:bg-white/25"
+          >
+            {t("promoBannerCta")}
+          </button>
+        </div>
+      </div>
 
       {/* filters */}
       <section className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8" aria-label="Course filters">

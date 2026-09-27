@@ -26,6 +26,7 @@ import {
   Search,
   ShieldCheck,
   ShoppingCart,
+  Sparkles,
   Languages,
   Home,
 } from "lucide-react";
@@ -143,6 +144,33 @@ function UserMenu({ light = false }: { light?: boolean }) {
   );
 }
 
+/* ============ cart button ============ */
+function CartButton() {
+  const { t } = useI18n();
+  const { cart, setView, view } = useApp();
+  const count = cart.length;
+  const active = view === "cart";
+  return (
+    <button
+      type="button"
+      onClick={() => setView("cart")}
+      aria-label={`${t("cartTitle")}${count ? ` (${count})` : ""}`}
+      className={`relative flex h-9 w-9 items-center justify-center rounded-full border transition ${
+        active
+          ? "border-indigo-200 bg-indigo-50 text-indigo-700"
+          : "border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:text-slate-900"
+      }`}
+    >
+      <ShoppingCart className="h-4.5 w-4.5" />
+      {count > 0 && (
+        <span className="absolute -right-1 -top-1 flex h-4.5 min-w-4.5 items-center justify-center rounded-full bg-indigo-600 px-1 text-[10px] font-bold text-white shadow">
+          {count > 9 ? "9+" : count}
+        </span>
+      )}
+    </button>
+  );
+}
+
 /* ============ storefront top bar ============ */
 export function TopHeader({ onSearch }: { onSearch?: (q: string) => void }) {
   const { t } = useI18n();
@@ -200,6 +228,7 @@ export function TopHeader({ onSearch }: { onSearch?: (q: string) => void }) {
           <div className="ml-auto" />
         )}
         <div className="flex items-center gap-2">
+          <CartButton />
           <LangToggle />
           <UserMenu />
         </div>
@@ -350,16 +379,78 @@ export function DashboardShell({
 /* ============ storefront footer ============ */
 export function SiteFooter() {
   const { t } = useI18n();
+  const { setView } = useApp();
+
+  const col = (title: string, links: { label: string; action: () => void }[]) => (
+    <div>
+      <p className="text-xs font-bold uppercase tracking-wider text-slate-900">{title}</p>
+      <ul className="mt-3 space-y-2.5">
+        {links.map((l) => (
+          <li key={l.label}>
+            <button
+              type="button"
+              onClick={l.action}
+              className="text-sm text-slate-600 transition hover:text-indigo-700"
+            >
+              {l.label}
+            </button>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+
   return (
     <footer className="mt-auto border-t border-slate-200 bg-white">
-      <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-4 py-8 text-sm text-muted-foreground sm:flex-row sm:px-6 lg:px-8">
-        <Logo />
-        <p>{t("footerTagline")}</p>
-        <p className="text-xs">{t("footerRights")}</p>
+      <div className="mx-auto grid max-w-7xl gap-10 px-4 py-12 sm:grid-cols-2 sm:px-6 lg:grid-cols-5 lg:px-8">
+        {/* brand column */}
+        <div className="lg:col-span-2">
+          <Logo />
+          <p className="mt-3 max-w-xs text-sm leading-relaxed text-slate-600">{t("footerTagline")}</p>
+          <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
+            <Sparkles className="h-3.5 w-3.5" />
+            {t("footerSplitBadge")}
+          </div>
+        </div>
+
+        {col(
+          t("footerExplore"),
+          [
+            { label: t("navMarketplace"), action: () => setView("marketplace") },
+            { label: t("navMyLearning"), action: () => setView("student") },
+            { label: t("cartTitle"), action: () => setView("cart") },
+            { label: t("wishlist"), action: () => setView("student") },
+          ],
+        )}
+
+        {col(
+          t("footerCompany"),
+          [
+            { label: t("footerAbout"), action: () => setView("about") },
+            { label: t("footerFaq"), action: () => setView("faq") },
+            { label: t("footerTeach"), action: () => setView("login") },
+          ],
+        )}
+
+        {col(
+          t("footerTrust"),
+          [
+            { label: t("refundPolicy"), action: () => setView("faq") },
+            { label: t("certificate"), action: () => setView("faq") },
+            { label: t("switchLang"), action: () => setView("marketplace") },
+          ],
+        )}
+      </div>
+
+      <div className="border-t border-slate-100">
+        <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-2 px-4 py-5 text-xs text-muted-foreground sm:flex-row sm:px-6 lg:px-8">
+          <p>© {new Date().getFullYear()} LearnHub. {t("footerRights")}</p>
+          <p className="flex items-center gap-1.5">
+            <GraduationCap className="h-3.5 w-3.5 text-indigo-500" />
+            {t("footerMadeWith")}
+          </p>
+        </div>
       </div>
     </footer>
   );
 }
-
-/* ============ mobile floating cart (unused placeholder) ============ */
-export { ShoppingCart };
