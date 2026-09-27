@@ -1,0 +1,157 @@
+export type Role = "STUDENT" | "INSTRUCTOR" | "ADMIN";
+export type Lang = "en" | "zh";
+
+export interface SessionUser {
+  id: string;
+  email: string;
+  name: string;
+  role: Role;
+  avatarColor: string;
+  headline?: string | null;
+  country?: string | null;
+}
+
+export interface Lesson {
+  id: string;
+  title: string;
+  durationMinutes: number;
+  order: number;
+  isPreview: boolean;
+}
+
+export interface CourseWithInstructor {
+  id: string;
+  title: string;
+  subtitle: string;
+  description: string;
+  category: string;
+  level: string;
+  price: number;
+  language: string;
+  coverGradient: string;
+  status: string;
+  durationMinutes: number;
+  lessonsCount: number;
+  rating: number;
+  ratingCount: number;
+  studentsCount: number;
+  createdAt: string;
+  updatedAt: string;
+  instructorId: string;
+  instructor: {
+    id: string;
+    name: string;
+    headline?: string | null;
+    bio?: string | null;
+    avatarColor: string;
+    country?: string | null;
+  };
+}
+
+export interface EnrolledCourse {
+  enrollmentId: string;
+  progress: number;
+  pricePaid: number;
+  enrolledAt: string;
+  course: CourseWithInstructor;
+}
+
+export interface StudentPurchase {
+  id: string;
+  type: string;
+  grossAmount: number;
+  status: string;
+  createdAt: string;
+  course: { id: string; title: string; coverGradient: string };
+}
+
+export interface LedgerTransaction {
+  id: string;
+  type: "SALE" | "REFUND";
+  grossAmount: number;
+  platformFee: number;
+  netEarnings: number;
+  status: string;
+  description?: string | null;
+  refundReason?: string | null;
+  createdAt: string;
+  course: { id: string; title: string; coverGradient: string };
+  student: { id: string; name: string; avatarColor: string; country?: string | null };
+}
+
+export interface Payout {
+  id: string;
+  amount: number;
+  method: string;
+  status: string;
+  note?: string | null;
+  requestedAt: string;
+  processedAt?: string | null;
+  instructor?: { id: string; name: string; avatarColor: string; email: string };
+}
+
+export interface MonthlyPoint {
+  month: string;
+  net: number;
+  gross: number;
+  fee: number;
+}
+
+export interface CourseBreakdown {
+  courseId: string;
+  title: string;
+  coverGradient: string;
+  sales: number;
+  refunds: number;
+  gross: number;
+  net: number;
+}
+
+export interface LedgerSummary {
+  lifetimeNet: number;
+  availableBalance: number;
+  pendingPayouts: number;
+  grossSales: number;
+  totalRefunds: number;
+  platformFees: number;
+  salesCount: number;
+  netLast30: number;
+  monthly: MonthlyPoint[];
+  byCourse: CourseBreakdown[];
+}
+
+export interface AdminStats {
+  gmv: number;
+  platformRevenue: number;
+  instructorEarnings: number;
+  userCount: number;
+  courseCount: number;
+  enrollmentCount: number;
+  pendingPayoutCount: number;
+  gmvLast30: number;
+  byCategory: { category: string; gross: number }[];
+  monthly: MonthlyPoint[];
+  recentTransactions: {
+    id: string;
+    type: string;
+    grossAmount: number;
+    platformFee: number;
+    netEarnings: number;
+    createdAt: string;
+    course: { title: string };
+    instructor: { name: string; avatarColor: string };
+    student: { name: string; avatarColor: string };
+  }[];
+}
+
+export interface AdminUser {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+  avatarColor: string;
+  country?: string | null;
+  createdAt: string;
+  courseCount?: number;
+  enrollmentCount?: number;
+}

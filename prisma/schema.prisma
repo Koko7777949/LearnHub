@@ -1,0 +1,108 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String        @id @default(cuid())
+  email       String        @unique
+  name        String
+  password    String
+  role        String        // STUDENT | INSTRUCTOR | ADMIN
+  avatarColor String        @default("indigo") // avatar gradient key
+  headline    String?
+  bio         String?
+  country     String?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  courses               Course[]       @relation("InstructorCourses")
+  enrollments           Enrollment[]
+  instructorTransactions Transaction[] @relation("InstructorTransactions")
+  studentTransactions   Transaction[] @relation("StudentTransactions")
+  payouts               Payout[]
+}
+
+model Course {
+  id              String   @id @default(cuid())
+  title           String
+  subtitle        String
+  description     String
+  category        String   // Development | Business | Design | DataScience | Marketing | IT
+  level           String   // BEGINNER | INTERMEDIATE | ADVANCED
+  price           Float
+  language        String   @default("English")
+  coverGradient   String   @default("from-indigo-500 to-violet-600")
+  status          String   @default("PUBLISHED") // DRAFT | PUBLISHED
+  durationMinutes Int      @default(0)
+  lessonsCount    Int      @default(0)
+  rating          Float    @default(0)
+  ratingCount     Int      @default(0)
+  studentsCount   Int      @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  instructorId String
+  instructor   User          @relation("InstructorCourses", fields: [instructorId], references: [id])
+  lessons      Lesson[]
+  enrollments  Enrollment[]
+  transactions Transaction[]
+}
+
+model Lesson {
+  id              String  @id @default(cuid())
+  courseId        String
+  course          Course  @relation(fields: [courseId], references: [id])
+  title           String
+  durationMinutes Int     @default(10)
+  order           Int     @default(0)
+  isPreview       Boolean @default(false)
+}
+
+model Enrollment {
+  id        String   @id @default(cuid())
+  studentId String
+  courseId  String
+  student   User     @relation(fields: [studentId], references: [id])
+  course    Course   @relation(fields: [courseId], references: [id])
+  pricePaid Float
+  progress  Float    @default(0)
+  createdAt DateTime @default(now())
+
+  @@unique([studentId, courseId])
+}
+
+model Transaction {
+  id                   String   @id @default(cuid())
+  type                 String   // SALE | REFUND
+  courseId             String
+  course               Course   @relation(fields: [courseId], references: [id])
+  studentId            String
+  student              User     @relation("StudentTransactions", fields: [studentId], references: [id])
+  instructorId         String
+  instructor           User     @relation("InstructorTransactions", fields: [instructorId], references: [id])
+  grossAmount          Float    // gross sale price (positive number)
+  platformFee          Float    // 30% platform commission
+  netEarnings          Float    // 70% instructor earnings
+  status               String   @default("COMPLETED") // COMPLETED | REFUNDED
+  description          String?
+  refundReason         String?
+  relatedTransactionId String?  // for REFUND entries -> original sale tx id
+  createdAt            DateTime @default(now())
+}
+
+model Payout {
+  id           String    @id @default(cuid())
+  instructorId String
+  instructor   User      @relation(fields: [instructorId], references: [id])
+  amount       Float
+  method       String    @default("PAYPAL") // PAYPAL | BANK_TRANSFER | STRIPE
+  status       String    @default("PENDING") // PENDING | APPROVED | PAID | REJECTED
+  note         String?
+  requestedAt  DateTime  @default(now())
+  processedAt  DateTime?
+}
