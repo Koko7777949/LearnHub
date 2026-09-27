@@ -18,13 +18,19 @@ A full-stack course marketplace with a Stripe-style instructor revenue ledger, t
 - Course catalog with search, category & level filters, sorting
 - Course detail pages with syllabus accordion and sticky purchase card
 - Instant checkout → transactional enrollment + revenue ledger entry
+- **Shopping cart** — multi-course bulk checkout with persisted cart, order summary and coupon redemption
+- **Coupon system** — storewide & course-scoped discount codes with usage caps, expiry dates and live validation
+- **About & FAQ pages** — mission, story, values, milestones + grouped Q&A
+- Professional multi-column footer + promo banner
 
 ### 🎓 Student
 - "My Learning" dashboard with course progress cards
 - Complete purchase history with prices and dates
+- Course player, reviews, wishlist, certificates of completion
 
 ### 👨‍🏫 Instructor
 - **Dashboard**: earnings stats, revenue area chart, per-course performance table
+- **Coupon management** — create course-scoped promo codes with discount %, usage caps and expiry; track redemptions
 - **Revenue Ledger** (4 tabs):
   - **Overview** — lifetime earnings, available balance, monthly revenue trend, 70/30 split donut
   - **Transactions** — filterable ledger (sales / refunds) with running balance
@@ -35,12 +41,14 @@ A full-stack course marketplace with a Stripe-style instructor revenue ledger, t
 ### 🛡️ Admin
 - Platform GMV, revenue, and enrollment analytics
 - **Payout approval queue**: approve → mark as paid, or reject with reason
+- **Coupon management** — create storewide or course-scoped coupons, activate/deactivate, view usage
 - User and course management
 
 ### 🌐 Platform
-- Full **EN / 中文** language toggle (≈200 i18n keys)
+- Full **EN / 中文** language toggle (≈290 i18n keys)
 - Role-based SPA routing with auth guards
 - Responsive: desktop dashboard + mobile drawer navigation
+- **Demo coupons**: `WELCOME25` (storewide −25%) · `LEARN10` (storewide −10%) · `SARAH30` / `DIEGO20` (course-scoped) · `EXPIRED15` / `BLACKFRIDAY50` (invalid states for testing)
 
 ## 📸 Screenshots
 
