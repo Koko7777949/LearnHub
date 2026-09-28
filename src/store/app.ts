@@ -113,6 +113,19 @@ export const useApp = create<AppState>()(
     {
       name: "learnhub-app",
       partialize: (s) => ({ user: s.user, lang: s.lang, cart: s.cart }),
+      merge: (persisted, current) => {
+        const p = (persisted ?? {}) as Partial<AppState>;
+        return {
+          ...current,
+          ...p,
+          // guard against unknown/stale persisted language codes
+          lang: ["en", "zh", "ar", "fr", "es", "de", "pt", "ru", "ja", "ko", "tr", "hi"].includes(
+            p.lang as string,
+          )
+            ? (p.lang as AppState["lang"])
+            : "en",
+        };
+      },
     },
   ),
 );

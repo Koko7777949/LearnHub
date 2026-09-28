@@ -29,45 +29,36 @@ import {
 
 /* ============================== ABOUT ============================== */
 export function AboutView() {
-  const { t, lang } = useI18n();
+  const { t } = useI18n();
   const { setView } = useApp();
-  const zh = lang === "zh";
 
   const values = [
     {
       icon: HeartHandshake,
-      title: zh ? "学习者至上" : "Learners first",
-      body: zh
-        ? "平台上的每个决策都从『是否帮助学习者真正掌握技能』出发——从课程结构到播放器体验。"
-        : "Every product decision starts with one question: does this help a learner truly master a skill — from curriculum design to the player experience.",
+      title: t("aboutValue1Title"),
+      body: t("aboutValue1Body"),
     },
     {
       icon: Scale,
-      title: zh ? "透明经济学" : "Transparent economics",
-      body: zh
-        ? "70/30 分成对讲师与学员完全公开。每笔销售、退款与平台佣金都记录在可导出的账本中。"
-        : "Our 70/30 revenue share is public to instructors and learners. Every sale, refund and platform fee lives in an exportable ledger.",
+      title: t("aboutValue2Title"),
+      body: t("aboutValue2Body"),
     },
     {
       icon: Award,
-      title: zh ? "质量把关" : "Quality bar",
-      body: zh
-        ? "课程由资深从业者打造，配套项目练习、结业证书与学员评价体系，保证学习成果可验证。"
-        : "Courses are built by senior practitioners, with project work, completion certificates and verified student reviews.",
+      title: t("aboutValue3Title"),
+      body: t("aboutValue3Body"),
     },
     {
       icon: Globe2,
-      title: zh ? "无界访问" : "Access without borders",
-      body: zh
-        ? "终身访问、多语言界面与随时随地的学习进度同步——教育不应有地理与时间的门槛。"
-        : "Lifetime access, a bilingual interface and progress that follows you anywhere — education shouldn't have borders or office hours.",
+      title: t("aboutValue4Title"),
+      body: t("aboutValue4Body"),
     },
   ];
 
   const milestones = [
-    { year: "2024", label: zh ? "LearnHub 立项：第一个 70/30 账本原型" : "LearnHub founded: first 70/30 ledger prototype" },
-    { year: "2025", label: zh ? "10 门专家课程上线，学员遍布 40+ 国家" : "10 expert courses launched, learners in 40+ countries" },
-    { year: "2026", label: zh ? "收益账本、即时打款与证书体系全面上线" : "Revenue ledger, instant payouts & certificates shipped" },
+    { year: "2024", label: t("aboutMilestone2024") },
+    { year: "2025", label: t("aboutMilestone2025") },
+    { year: "2026", label: t("aboutMilestone2026") },
   ];
 
   return (
@@ -98,10 +89,10 @@ export function AboutView() {
       <section className="border-b border-slate-200 bg-slate-950">
         <div className="mx-auto grid max-w-7xl grid-cols-2 gap-6 px-4 py-10 sm:px-6 lg:grid-cols-4 lg:px-8">
           {[
-            { icon: BookOpen, value: "10+", label: zh ? "专家课程" : "Expert courses" },
-            { icon: Users, value: "88+", label: zh ? "报名人次" : "Enrollments" },
-            { icon: Globe2, value: "40+", label: zh ? "国家/地区" : "Countries" },
-            { icon: Star, value: "4.3", label: zh ? "平均评分" : "Avg. rating" },
+            { icon: BookOpen, value: "10+", label: t("aboutStatCourses") },
+            { icon: Users, value: "88+", label: t("aboutStatEnrollments") },
+            { icon: Globe2, value: "40+", label: t("aboutStatCountries") },
+            { icon: Star, value: "4.3", label: t("aboutStatRating") },
           ].map((s) => (
             <div key={s.label} className="flex flex-col items-center gap-1.5 text-center">
               <s.icon className="h-5 w-5 text-indigo-400" />
@@ -168,7 +159,7 @@ export function AboutView() {
               className="border-white/30 bg-white/10 text-white hover:bg-white/20 hover:text-white"
               onClick={() => setView("login")}
             >
-              {zh ? "开始授课" : "Start teaching"}
+              {t("aboutStartTeaching")}
             </Button>
           </div>
         </div>
@@ -183,141 +174,55 @@ export function AboutView() {
 type FaqItem = { q: string; a: string };
 
 export function FaqView() {
-  const { t, lang } = useI18n();
+  const { t } = useI18n();
   const { setView } = useApp();
-  const zh = lang === "zh";
 
   const groups: { icon: React.ElementType; title: string; items: FaqItem[] }[] = [
     {
       icon: GraduationCap,
-      title: zh ? "入门与账号" : "Getting started",
+      title: t("faqGroupGettingStarted"),
       items: [
-        {
-          q: zh ? "如何开始在 LearnHub 学习？" : "How do I start learning on LearnHub?",
-          a: zh
-            ? "浏览课程市场，使用分类、难度与排序筛选找到心仪课程。点击课程卡片查看完整大纲与讲师介绍，观看免费试听课后即可购买。"
-            : "Browse the marketplace and use category, level and sort filters to find a course. Open a course page for the full curriculum and instructor bio, watch the free preview lessons, then enroll.",
-        },
-        {
-          q: zh ? "有演示账号可以体验吗？" : "Is there a demo account I can try?",
-          a: zh
-            ? "登录页提供一键演示登录：学生、讲师与管理员三种角色，无需注册即可体验完整功能。"
-            : "The sign-in page offers one-click demo logins for Student, Instructor and Admin roles — explore every feature without signing up.",
-        },
-        {
-          q: zh ? "课程支持哪些语言？" : "Which languages are supported?",
-          a: zh
-            ? "课程为英文或中文授课（见课程详情页标注），平台界面支持 EN/中文 一键切换。"
-            : "Courses are taught in English or Chinese (noted on each course page), and the interface toggles between EN and 中文 with one click.",
-        },
-        {
-          q: zh ? "购买后能学习多久？" : "How long do I keep access after buying?",
-          a: zh
-            ? "终身访问。购买后课程永久保留在『我的学习』中，学习进度自动同步。"
-            : "Forever. Enrolled courses stay in My Learning for life, and your progress syncs automatically.",
-        },
+        { q: t("faqStart1Q"), a: t("faqStart1A") },
+        { q: t("faqStart2Q"), a: t("faqStart2A") },
+        { q: t("faqStart3Q"), a: t("faqStart3A") },
+        { q: t("faqStart4Q"), a: t("faqStart4A") },
       ],
     },
     {
       icon: Landmark,
-      title: zh ? "支付与定价" : "Payments & pricing",
+      title: t("faqGroupPayments"),
       items: [
-        {
-          q: zh ? "可以一次购买多门课程吗？" : "Can I buy several courses at once?",
-          a: zh
-            ? "可以。在课程页点击『加入购物车』，购物车支持批量结算，一次完成多门课程的购买。"
-            : "Yes. Use “Add to cart” on any course page and check out the whole cart in a single order.",
-        },
-        {
-          q: zh ? "如何使用优惠码？" : "How do coupons work?",
-          a: zh
-            ? "在购物车结算面板输入优惠码并点击应用。平台通用码对所有课程生效，课程专属码只对该课程打折，折扣立即反映在订单总额中。"
-            : "Enter a code in the cart's order summary and hit Apply. Storewide coupons discount every item; course-specific coupons discount only that course. The total updates instantly.",
-        },
-        {
-          q: zh ? "优惠码失效的原因有哪些？" : "Why might a coupon be rejected?",
-          a: zh
-            ? "常见原因：码不存在、已被停用、超过有效期、达到最大使用次数，或购物车中没有适用于该码的课程。"
-            : "Common reasons: the code doesn't exist, was deactivated, expired, reached its usage limit, or no course in your cart is covered by it.",
-        },
-        {
-          q: zh ? "这是真实支付吗？" : "Are these real payments?",
-          a: zh
-            ? "不是。LearnHub 是演示环境，不处理真实付款；所有『购买』均为演示数据，用于展示完整的交易与账本流程。"
-            : "No. LearnHub is a demo environment — no real money moves. Every “purchase” is demo data that exercises the full transaction and ledger flow.",
-        },
+        { q: t("faqPay1Q"), a: t("faqPay1A") },
+        { q: t("faqPay2Q"), a: t("faqPay2A") },
+        { q: t("faqPay3Q"), a: t("faqPay3A") },
+        { q: t("faqPay4Q"), a: t("faqPay4A") },
       ],
     },
     {
       icon: Award,
-      title: zh ? "证书与学习成果" : "Certificates & outcomes",
+      title: t("faqGroupCertificates"),
       items: [
-        {
-          q: zh ? "如何获得结业证书？" : "How do I earn a certificate?",
-          a: zh
-            ? "完成课程全部课时后，播放器会显示『领取证书』。证书包含你的姓名、课程名称、完成日期与唯一编号，可打印或保存为 PDF。"
-            : "Finish every lesson in a course and the player shows “Get certificate”. It carries your name, the course, completion date and a unique ID — printable or saveable as PDF.",
-        },
-        {
-          q: zh ? "证书可以被验证吗？" : "Can the certificate be verified?",
-          a: zh
-            ? "每张证书都有唯一编号。作为演示项目，验证依赖该编号与课程记录的一致性；生产环境可对接注册库。"
-            : "Each certificate has a unique ID. In this demo, verification relies on matching that ID against course records; a production build would add a public registry.",
-        },
-        {
-          q: zh ? "可以评价学过的课程吗？" : "Can I review courses I've taken?",
-          a: zh
-            ? "可以，且仅限已购学员评价（标注『已验证学员』）。评分1–5星并附文字评价，评价直接展示在课程页。"
-            : "Yes — only verified buyers can review (you'll show a “Verified learner” badge). Rate 1–5 stars with a comment; reviews appear on the course page.",
-        },
+        { q: t("faqCert1Q"), a: t("faqCert1A") },
+        { q: t("faqCert2Q"), a: t("faqCert2A") },
+        { q: t("faqCert3Q"), a: t("faqCert3A") },
       ],
     },
     {
       icon: LineChart,
-      title: zh ? "讲师与收益" : "Instructors & payouts",
+      title: t("faqGroupInstructors"),
       items: [
-        {
-          q: zh ? "如何成为讲师？" : "How do I become an instructor?",
-          a: zh
-            ? "使用讲师账号登录后进入『课程创作中心』：填写课程信息、添加课时并发布，课程立即上架市场。"
-            : "Sign in with an instructor account and open the Course Studio: fill in the details, add lessons, publish — the course goes live on the marketplace instantly.",
-        },
-        {
-          q: zh ? "70/30 分成如何计算？" : "How is the 70/30 split computed?",
-          a: zh
-            ? "每笔销售按学员实付金额计算：30% 为平台佣金，70% 为讲师净收益。使用优惠码时按折后价分成，全部记录在收益账本中。"
-            : "Every sale splits the amount the student actually paid: 30% platform fee, 70% instructor net. Coupons discount the paid amount first — it's all recorded in the revenue ledger.",
-        },
-        {
-          q: zh ? "如何申请打款？" : "How do payouts work?",
-          a: zh
-            ? "在收益账本中点击『申请打款』，选择 PayPal、银行转账或 Stripe 并输入金额。管理员批准并标记完成后，金额从可用余额中扣除。"
-            : "From the Revenue Ledger, request a payout via PayPal, bank transfer or Stripe. Once an admin approves and marks it paid, the amount leaves your available balance.",
-        },
-        {
-          q: zh ? "讲师可以发优惠码吗？" : "Can instructors issue coupons?",
-          a: zh
-            ? "可以。讲师可在讲师中心为自己的课程创建专属优惠码（自定义折扣比例、次数与有效期），并在管理面板跟踪使用情况。"
-            : "Yes. Instructors create course-scoped coupons in the instructor dashboard — choosing the discount, usage cap and expiry — and track redemptions.",
-        },
+        { q: t("faqInst1Q"), a: t("faqInst1A") },
+        { q: t("faqInst2Q"), a: t("faqInst2A") },
+        { q: t("faqInst3Q"), a: t("faqInst3A") },
+        { q: t("faqInst4Q"), a: t("faqInst4A") },
       ],
     },
     {
       icon: Scale,
-      title: zh ? "退款政策" : "Refunds",
+      title: t("faqGroupRefunds"),
       items: [
-        {
-          q: zh ? "退款政策是什么？" : "What is the refund policy?",
-          a: zh
-            ? "购买后 30 天内可申请退款（演示环境由管理员处理）。退款会生成负向账本条目，抵扣讲师净收益与平台佣金。"
-            : "Request a refund within 30 days of purchase (admins process it in this demo). Refunds create negative ledger entries that offset instructor net earnings and the platform fee.",
-        },
-        {
-          q: zh ? "退款后还能访问课程吗？" : "Do I keep access after a refund?",
-          a: zh
-            ? "退款完成后课程访问权限即被收回；如需再次学习可重新购买（可配合优惠码）。"
-            : "Access is revoked once the refund completes. You can re-enroll at any time — coupons welcome.",
-        },
+        { q: t("faqRef1Q"), a: t("faqRef1A") },
+        { q: t("faqRef2Q"), a: t("faqRef2A") },
       ],
     },
   ];

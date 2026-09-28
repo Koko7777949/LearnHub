@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { useI18n, trCategory } from "@/lib/i18n";
+import { useI18n, trCategory, localeOf } from "@/lib/i18n";
 import { useApp } from "@/store/app";
 import { Search, Star, Users, CornerDownLeft, TrendingUp } from "lucide-react";
 import type { SuggestCourse } from "@/lib/types";
@@ -218,11 +218,11 @@ export function SearchAutocomplete({ onSearch }: { onSearch: (q: string) => void
                         <span className="inline-flex items-center gap-0.5">
                           <Star className="h-3 w-3 fill-amber-500 text-amber-500" />
                           {c.rating.toFixed(1)}
-                          <span className="text-slate-400">({c.ratingCount.toLocaleString(lang === "zh" ? "zh-CN" : "en-US")})</span>
+                          <span className="text-slate-400">({c.ratingCount.toLocaleString(localeOf(lang))})</span>
                         </span>
                         <span className="inline-flex items-center gap-0.5">
                           <Users className="h-3 w-3" />
-                          {c.studentsCount.toLocaleString(lang === "zh" ? "zh-CN" : "en-US")}
+                          {c.studentsCount.toLocaleString(localeOf(lang))}
                         </span>
                       </span>
                       <span className="mt-0.5 block truncate text-[11px] text-slate-400">

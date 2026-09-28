@@ -15,6 +15,21 @@ import { apiPost } from "@/hooks/use-api";
 
 const CATEGORIES = ["Development", "Business", "Design", "Data Science", "Marketing", "IT & Software"];
 const LEVELS = ["BEGINNER", "INTERMEDIATE", "ADVANCED"];
+/** teaching languages offered when publishing a course */
+const COURSE_LANGUAGES = [
+  "English",
+  "中文",
+  "العربية",
+  "Français",
+  "Español",
+  "Deutsch",
+  "Português",
+  "Русский",
+  "日本語",
+  "한국어",
+  "Türkçe",
+  "हिन्दी",
+];
 const GRADIENTS = [
   { value: "from-indigo-500 via-violet-500 to-purple-600", label: "Indigo Violet" },
   { value: "from-teal-400 via-cyan-500 to-sky-600", label: "Teal Sky" },
@@ -45,7 +60,7 @@ export function InstructorStudio() {
   const [category, setCategory] = useState("Development");
   const [level, setLevel] = useState("BEGINNER");
   const [price, setPrice] = useState("49.99");
-  const [language, setLanguage] = useState(lang === "zh" ? "中文" : "English");
+  const [language, setLanguage] = useState<string>("English");
   const [gradient, setGradient] = useState(GRADIENTS[0].value);
   const [lessons, setLessons] = useState<DraftLesson[]>([
     { id: 1, title: "", durationMinutes: 15 },
@@ -260,8 +275,11 @@ export function InstructorStudio() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="English">English</SelectItem>
-                    <SelectItem value="中文">中文</SelectItem>
+                    {COURSE_LANGUAGES.map((l) => (
+                      <SelectItem key={l} value={l}>
+                        {l}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>

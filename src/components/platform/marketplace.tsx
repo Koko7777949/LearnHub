@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useMemo, useState } from "react";
-import { useI18n, trCategory } from "@/lib/i18n";
+import { useI18n, trCategory, trLevel, localeOf } from "@/lib/i18n";
 import { useApp } from "@/store/app";
 import { useApi, apiPost } from "@/hooks/use-api";
 import { CourseCard } from "@/components/platform/course-card";
@@ -99,7 +99,7 @@ export function Marketplace() {
               <div className="h-10 w-px bg-slate-200" />
               <div>
                 <p className="text-2xl font-bold text-slate-900 sm:text-3xl">
-                  {totals.students.toLocaleString(lang === "zh" ? "zh-CN" : "en-US")}
+                  {totals.students.toLocaleString(localeOf(lang))}
                 </p>
                 <p className="mt-0.5 text-xs font-medium text-slate-500">{t("heroStatStudents")}</p>
               </div>
@@ -158,9 +158,7 @@ export function Marketplace() {
               <SelectContent>
                 {LEVELS.map((l) => (
                   <SelectItem key={l} value={l} className="text-xs">
-                    {l === "ALL" ? `${t("levelLabel")}: ${t("all")}` : lang === "zh"
-                      ? { BEGINNER: "入门", INTERMEDIATE: "进阶", ADVANCED: "高级" }[l]
-                      : l}
+                    {l === "ALL" ? `${t("levelLabel")}: ${t("all")}` : trLevel(l, lang)}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -255,12 +253,10 @@ export function Marketplace() {
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-6 px-4 py-12 text-center sm:px-6 lg:flex-row lg:px-8 lg:text-left">
           <div>
             <h2 className="text-2xl font-bold tracking-tight text-white sm:text-3xl">
-              {lang === "zh" ? "在 LearnHub 授课，收益透明分成" : "Teach on LearnHub — earn with full transparency"}
+              {t("teachCtaTitle")}
             </h2>
             <p className="mt-2 max-w-xl text-sm text-slate-400">
-              {lang === "zh"
-                ? "发布课程，每笔销售按 70/30 记入你的收益账本，随时申请打款。"
-                : "Publish courses, watch every sale land in your revenue ledger with an exact 70/30 split, and request payouts anytime."}
+              {t("teachCtaBody")}
             </p>
           </div>
           <Button
@@ -269,7 +265,7 @@ export function Marketplace() {
             onClick={() => setView("login")}
           >
             <BookOpen className="mr-2 h-4 w-4" />
-            {lang === "zh" ? "开始授课" : "Start teaching"}
+            {t("aboutStartTeaching")}
           </Button>
         </div>
       </section>

@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { useI18n } from "@/lib/i18n";
+import { useI18n, localeOf } from "@/lib/i18n";
 import { useApp } from "@/store/app";
 import { CourseCover, Rating, CourseMeta, LevelBadge } from "@/components/platform/ui-bits";
 import { Badge } from "@/components/ui/badge";
@@ -57,7 +57,7 @@ export function CourseCard({
             <LevelBadge level={course.level} />
             <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
               <Users className="h-3.5 w-3.5" />
-              {course.studentsCount.toLocaleString(lang === "zh" ? "zh-CN" : "en-US")} {t("studentsCount")}
+              {course.studentsCount.toLocaleString(localeOf(lang))} {t("studentsCount")}
             </span>
           </div>
           <CourseMeta lessons={course.lessonsCount} minutes={course.durationMinutes} />

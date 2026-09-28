@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef } from "react";
 import { useApp } from "@/store/app";
-import { LanguageProvider } from "@/lib/i18n";
+import { LanguageProvider, isRTL } from "@/lib/i18n";
 import { Marketplace } from "@/components/platform/marketplace";
 import { CourseDetail } from "@/components/platform/course-detail";
 import { CoursePlayer } from "@/components/platform/course-player";
@@ -62,6 +62,13 @@ function StripeRedirectHandler() {
 
 function AppBody() {
   const { user, view, lang, setLang } = useApp();
+
+  // keep <html> dir/lang in sync — RTL for Arabic, LTR otherwise
+  useEffect(() => {
+    const dir = isRTL(lang) ? "rtl" : "ltr";
+    document.documentElement.dir = dir;
+    document.documentElement.lang = lang;
+  }, [lang]);
 
   let content: React.ReactNode;
   switch (view) {

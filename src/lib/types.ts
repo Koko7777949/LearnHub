@@ -1,5 +1,5 @@
 export type Role = "STUDENT" | "INSTRUCTOR" | "ADMIN";
-export type Lang = "en" | "zh";
+export type Lang = "en" | "zh" | "ar" | "fr" | "es" | "de" | "pt" | "ru" | "ja" | "ko" | "tr" | "hi";
 
 export interface SessionUser {
   id: string;

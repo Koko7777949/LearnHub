@@ -19,7 +19,7 @@ const demoAccounts = [
     roleKey: "roleInstructor" as const,
     icon: LineChart,
     color: "indigo",
-    note: { en: "4 courses · rich ledger data", zh: "4 门课程 · 丰富账本数据" },
+    noteKey: "demoNoteInstructor" as const,
   },
   {
     email: "liam@student.dev",
@@ -27,7 +27,7 @@ const demoAccounts = [
     roleKey: "roleStudent" as const,
     icon: GraduationCap,
     color: "blue",
-    note: { en: "Enrolled courses & purchases", zh: "已报名课程与购买记录" },
+    noteKey: "demoNoteStudent" as const,
   },
   {
     email: "admin@learnhub.dev",
@@ -35,12 +35,12 @@ const demoAccounts = [
     roleKey: "roleAdmin" as const,
     icon: ShieldCheck,
     color: "slate",
-    note: { en: "Platform stats & approvals", zh: "平台统计与审批" },
+    noteKey: "demoNoteAdmin" as const,
   },
 ];
 
 export function AuthView() {
-  const { t, lang } = useI18n();
+  const { t } = useI18n();
   const { setUser, view, pendingCourseId, clearCheckoutIntent, openCourse } = useApp();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -88,19 +88,15 @@ export function AuthView() {
         </div>
         <div className="relative max-w-md space-y-6">
           <h2 className="text-4xl font-bold leading-tight tracking-tight">
-            {lang === "zh" ? "透明的课程市场" : "The transparent course marketplace"}
+            {t("authMarketingTitle")}
           </h2>
           <p className="text-lg leading-relaxed text-white/80">
-            {lang === "zh"
-              ? "每一笔销售都按 70/30 分成记录在案。学生放心买，讲师清楚赚。"
-              : "Every sale recorded with an exact 70/30 split. Students buy with confidence, instructors earn with clarity."}
+            {t("authMarketingBody")}
           </p>
           <div className="flex items-center gap-3 rounded-2xl border border-white/15 bg-white/10 p-4 backdrop-blur">
             <Sparkles className="h-5 w-5 shrink-0" />
             <p className="text-sm text-white/90">
-              {lang === "zh"
-                ? "收益账本 · 打款审批 · 退款追踪 · CSV 导出"
-                : "Revenue ledger · Payout approvals · Refund tracking · CSV export"}
+              {t("authMarketingFeatures")}
             </p>
           </div>
         </div>
@@ -122,7 +118,7 @@ export function AuthView() {
 
           {isCheckout && (
             <div className="mt-4 rounded-lg border border-indigo-200 bg-indigo-50 px-4 py-3 text-sm text-indigo-700">
-              {lang === "zh" ? "登录后将自动跳回课程完成购买。" : "Sign in to complete your purchase — you'll be taken back to the course."}
+              {t("authCheckoutReturn")}
             </div>
           )}
 
@@ -182,7 +178,7 @@ export function AuthView() {
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-semibold text-slate-900">{acc.name}</p>
                   <p className="truncate text-xs text-muted-foreground">
-                    {t(acc.roleKey)} · {acc.note[lang]}
+                    {t(acc.roleKey)} · {t(acc.noteKey)}
                   </p>
                 </div>
                 {busy === acc.email ? (

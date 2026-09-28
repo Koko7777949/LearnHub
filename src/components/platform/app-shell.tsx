@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { useApp } from "@/store/app";
-import { useI18n } from "@/lib/i18n";
+import { useI18n, LANGUAGES, langMeta } from "@/lib/i18n";
 import { Avatar } from "@/components/platform/ui-bits";
 import { Button } from "@/components/ui/button";
 import {
@@ -18,6 +18,7 @@ import { SearchAutocomplete } from "@/components/platform/search-autocomplete";
 import {
   BookOpen,
   CircleUserRound,
+  Check,
   GraduationCap,
   LayoutDashboard,
   LineChart,
@@ -59,25 +60,45 @@ function Logo({ light = false }: { light?: boolean }) {
   );
 }
 
-/* ============ language toggle ============ */
+/* ============ language selector (12 languages) ============ */
 function LangToggle({ light = false }: { light?: boolean }) {
   const { t, setLang } = useI18n();
   const { lang } = useApp();
+  const current = langMeta(lang);
+
   return (
-    <Button
-      variant="outline"
-      size="sm"
-      className={
-        light
-          ? "h-9 border-white/15 bg-white/10 text-white hover:bg-white/20 hover:text-white"
-          : "h-9 gap-1.5 border-slate-200 bg-white"
-      }
-      onClick={() => setLang(lang === "en" ? "zh" : "en")}
-      aria-label="Toggle language"
-    >
-      <Languages className="h-4 w-4" />
-      {t("switchLang")}
-    </Button>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant="outline"
+          size="sm"
+          className={
+            light
+              ? "h-9 gap-1.5 border-white/15 bg-white/10 text-white hover:bg-white/20 hover:text-white"
+              : "h-9 gap-1.5 border-slate-200 bg-white"
+          }
+          aria-label={t("languageLabel")}
+        >
+          <Languages className="h-4 w-4 shrink-0" />
+          <span className="hidden max-w-24 truncate sm:inline">{current.native}</span>
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="max-h-[70vh] w-52 overflow-y-auto">
+        <DropdownMenuLabel>{t("languageLabel")} · 12</DropdownMenuLabel>
+        {LANGUAGES.map((l) => (
+          <DropdownMenuItem
+            key={l.code}
+            onClick={() => setLang(l.code)}
+            className="gap-2.5"
+            aria-label={l.english}
+          >
+            <span aria-hidden className="text-base leading-none">{l.flag}</span>
+            <span className={l.code === "ar" ? "font-semibold" : undefined}>{l.native}</span>
+            {l.code === lang && <Check className="ms-auto h-4 w-4 text-indigo-600" />}
+          </DropdownMenuItem>
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }
 
@@ -415,7 +436,7 @@ export function SiteFooter() {
           [
             { label: t("refundPolicy"), action: () => setView("faq") },
             { label: t("certificate"), action: () => setView("faq") },
-            { label: t("switchLang"), action: () => setView("marketplace") },
+            { label: t("languageLabel"), action: () => setView("marketplace") },
           ],
         )}
       </div>

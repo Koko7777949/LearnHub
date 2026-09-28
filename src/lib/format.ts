@@ -1,5 +1,24 @@
 import type { Lang } from "./types";
 
+const INTL_LOCALE: Record<Lang, string> = {
+  en: "en-US",
+  zh: "zh-CN",
+  ar: "ar-EG",
+  fr: "fr-FR",
+  es: "es-ES",
+  de: "de-DE",
+  pt: "pt-BR",
+  ru: "ru-RU",
+  ja: "ja-JP",
+  ko: "ko-KR",
+  tr: "tr-TR",
+  hi: "hi-IN",
+};
+
+function loc(lang: Lang) {
+  return INTL_LOCALE[lang] ?? "en-US";
+}
+
 export function fmtMoney(n: number, opts: { compact?: boolean; sign?: boolean } = {}) {
   const abs = Math.abs(n);
   const prefix = opts.sign && n > 0 ? "+" : n < 0 ? "-" : "";
@@ -20,7 +39,7 @@ export function fmtMoneyShort(n: number) {
 
 export function fmtDate(iso: string | Date, lang: Lang = "en") {
   const d = typeof iso === "string" ? new Date(iso) : iso;
-  return d.toLocaleDateString(lang === "zh" ? "zh-CN" : "en-US", {
+  return d.toLocaleDateString(loc(lang), {
     year: "numeric",
     month: "short",
     day: "numeric",
@@ -29,7 +48,7 @@ export function fmtDate(iso: string | Date, lang: Lang = "en") {
 
 export function fmtDateTime(iso: string | Date, lang: Lang = "en") {
   const d = typeof iso === "string" ? new Date(iso) : iso;
-  return d.toLocaleString(lang === "zh" ? "zh-CN" : "en-US", {
+  return d.toLocaleString(loc(lang), {
     year: "numeric",
     month: "short",
     day: "numeric",
@@ -40,14 +59,37 @@ export function fmtDateTime(iso: string | Date, lang: Lang = "en") {
 
 export function fmtMonth(iso: string, lang: Lang = "en") {
   const d = new Date(iso + "T00:00:00");
-  return d.toLocaleDateString(lang === "zh" ? "zh-CN" : "en-US", { month: "short" });
+  return d.toLocaleDateString(loc(lang), { month: "short" });
 }
 
 export function fmtDuration(minutes: number, lang: Lang = "en") {
   const h = Math.floor(minutes / 60);
   const m = minutes % 60;
-  if (lang === "zh") return h > 0 ? `${h} 小时 ${m} 分` : `${m} 分钟`;
-  return h > 0 ? `${h}h ${m}m` : `${m}m`;
+  switch (lang) {
+    case "zh":
+      return h > 0 ? `${h} 小时 ${m} 分` : `${m} 分钟`;
+    case "ar":
+      return h > 0 ? `${h} س ${m} د` : `${m} د`;
+    case "fr":
+      return h > 0 ? `${h} h ${m} min` : `${m} min`;
+    case "es":
+    case "pt":
+      return h > 0 ? `${h} h ${m} min` : `${h === 0 && m === 0 ? 0 : m} min`;
+    case "de":
+      return h > 0 ? `${h} Std. ${m} Min.` : `${m} Min.`;
+    case "ru":
+      return h > 0 ? `${h} ч ${m} мин` : `${m} мин`;
+    case "ja":
+      return h > 0 ? `${h}時間${m}分` : `${m}分`;
+    case "ko":
+      return h > 0 ? `${h}시간 ${m}분` : `${m}분`;
+    case "tr":
+      return h > 0 ? `${h} sa ${m} dk` : `${m} dk`;
+    case "hi":
+      return h > 0 ? `${h} घं ${m} मि` : `${m} मि`;
+    default:
+      return h > 0 ? `${h}h ${m}m` : `${m}m`;
+  }
 }
 
 export function fmtNumber(n: number) {

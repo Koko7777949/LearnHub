@@ -6,7 +6,7 @@
 
 **Next.js 16 · React 19 · TypeScript · Prisma + SQLite · Tailwind CSS 4 · shadcn/ui · Recharts**
 
-A full-stack course marketplace with a Stripe-style instructor revenue ledger, transparent 70/30 revenue split, payout workflow, and a complete admin panel — bilingual (English / 中文).
+A full-stack course marketplace with a Stripe-style instructor revenue ledger, transparent 70/30 revenue split, payout workflow, and a complete admin panel — fully multilingual (12 languages: English, 中文, العربية, Français, Español, Deutsch, Português, Русский, 日本語, 한국어, Türkçe, हिन्दी) with RTL support for Arabic.
 
 </div>
 
@@ -149,7 +149,8 @@ src/
 │                           # revenue-ledger, search-autocomplete, studio, app shell
 ├── lib/enroll.ts           # shared pricing + enrollment engine (demo & Stripe rails)
 ├── lib/ledger.ts           # computeLedger(): balance, monthly buckets, per-course
-├── lib/i18n.tsx            # EN/中文 dictionaries + LanguageProvider
+├── lib/i18n.tsx            # 12-language switcher core + LanguageProvider
+├── lib/locales/            # generated per-language dictionaries (en/zh/ar/fr/es/de/pt/ru/ja/ko/tr/hi)
 ├── lib/format.ts           # money/date formatting helpers
 └── store/app.ts            # Zustand: user · language · view · cart · checkout intent
 ```

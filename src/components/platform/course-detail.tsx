@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useMemo, useState } from "react";
-import { useI18n, trLevel } from "@/lib/i18n";
+import { useI18n, trLevel, localeOf } from "@/lib/i18n";
 import { useApp } from "@/store/app";
 import { useApi, apiPost } from "@/hooks/use-api";
 import { TopHeader, SiteFooter } from "@/components/platform/app-shell";
@@ -186,7 +186,7 @@ export function CourseDetail() {
             <Rating value={course.rating} count={course.ratingCount} />
             <span className="inline-flex items-center gap-1.5">
               <Users className="h-4 w-4 text-slate-400" />
-              {course.studentsCount.toLocaleString(lang === "zh" ? "zh-CN" : "en-US")} {t("studentsCount")}
+              {course.studentsCount.toLocaleString(localeOf(lang))} {t("studentsCount")}
             </span>
             <span className="inline-flex items-center gap-1.5">
               <BookOpen className="h-4 w-4 text-slate-400" />
@@ -233,7 +233,7 @@ export function CourseDetail() {
                   <AccordionTrigger className="py-3.5 text-sm font-semibold text-slate-900 hover:no-underline">
                     <span className="flex items-center gap-2">
                       <PlayCircle className="h-4 w-4 text-indigo-600" />
-                      {lang === "zh" ? "课程章节" : "Course sections"}
+                      {t("detailCourseSections")}
                     </span>
                   </AccordionTrigger>
                   <AccordionContent>
@@ -321,9 +321,7 @@ export function CourseDetail() {
                   <p className="text-3xl font-extrabold tracking-tight text-slate-900">${course.price.toFixed(2)}</p>
                   {user && user.role !== "STUDENT" ? (
                     <p className="rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-700">
-                      {lang === "zh"
-                        ? "当前账户为讲师/管理员，需以学生身份登录后购买。"
-                        : "You're signed in as instructor/admin — sign in as a student to purchase."}
+                      {t("detailNonStudentHint")}
                     </p>
                   ) : null}
                   <Button
@@ -415,7 +413,7 @@ export function CourseDetail() {
                 <div>
                   <p className="text-muted-foreground">{t("lastUpdated")}</p>
                   <p className="mt-0.5 font-semibold text-slate-800">
-                    {new Date(course.updatedAt).toLocaleDateString(lang === "zh" ? "zh-CN" : "en-US")}
+                    {new Date(course.updatedAt).toLocaleDateString(localeOf(lang))}
                   </p>
                 </div>
                 <div>

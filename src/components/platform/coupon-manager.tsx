@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { useI18n } from "@/lib/i18n";
+import { useI18n, localeOf } from "@/lib/i18n";
 import { useApp } from "@/store/app";
 import { useApi, apiPost, apiPatch } from "@/hooks/use-api";
 import { EmptyState } from "@/components/platform/ui-bits";
@@ -300,12 +300,12 @@ export function CouponManager({ role }: { role: Extract<Role, "ADMIN" | "INSTRUC
                         <td className="px-4 py-3 text-xs text-slate-600">{c.creator.name}</td>
                       )}
                       <td className="px-4 py-3 text-xs tabular-nums text-slate-600">
-                        {c.usedCount.toLocaleString(lang === "zh" ? "zh-CN" : "en-US")}/
-                        {c.maxUses.toLocaleString(lang === "zh" ? "zh-CN" : "en-US")}
+                        {c.usedCount.toLocaleString(localeOf(lang))}/
+                        {c.maxUses.toLocaleString(localeOf(lang))}
                       </td>
                       <td className="px-4 py-3 text-xs text-slate-600">
                         {c.expiresAt
-                          ? new Date(c.expiresAt).toLocaleDateString(lang === "zh" ? "zh-CN" : "en-US")
+                          ? new Date(c.expiresAt).toLocaleDateString(localeOf(lang))
                           : "—"}
                       </td>
                       <td className="px-4 py-3">

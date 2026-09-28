@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { useI18n } from "@/lib/i18n";
+import { useI18n, localeOf, type Lang } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
 import { Award, BookOpen, Printer } from "lucide-react";
 
@@ -30,12 +30,12 @@ export function CertificateModal({
   hours: number;
   lessons: number;
   completedAt: string;
-  lang: "en" | "zh";
+  lang: Lang;
 }) {
   const { t } = useI18n();
   if (!open) return null;
 
-  const dateStr = new Date(completedAt).toLocaleDateString(lang === "zh" ? "zh-CN" : "en-US", {
+  const dateStr = new Date(completedAt).toLocaleDateString(localeOf(lang), {
     year: "numeric",
     month: "long",
     day: "numeric",

@@ -95,11 +95,8 @@ function VideoStage({ videoUrl, title, playing, onTogglePlay }: { videoUrl: stri
 }
 
 /* deterministic-ish lesson summary text */
-function lessonSummary(title: string, lang: "en" | "zh") {
-  if (lang === "zh") {
-    return `本课时「${title}」将带你逐层拆解核心概念：先讲清楚为什么需要它，再通过一个可运行的最小示例演示具体做法，最后给出工程实践中的注意事项与常见陷阱。建议跟随练习文件同步操作，完成后立即完成右侧的知识点测验以巩固记忆。`;
-  }
-  return `In this lesson — "${title}" — we break the topic down layer by layer: why it matters, how it works through a minimal runnable example, and the practical pitfalls engineers hit in production. Follow along with the exercise files, then take the knowledge check to lock the concepts in.`;
+function lessonSummary(title: string, t: (key: string) => string) {
+  return t("lessonSummaryText").replace("{title}", title);
 }
 
 export function CoursePlayer() {
@@ -383,7 +380,7 @@ export function CoursePlayer() {
                         {t("playerLessonSummary")}
                       </p>
                       <p className="text-sm leading-relaxed text-slate-300">
-                        {lessonSummary(current.title, lang)}
+                        {lessonSummary(current.title, t)}
                       </p>
                     </div>
                     <div>

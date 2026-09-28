@@ -17,8 +17,8 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "LearnHub — Online Courses Platform with Instructor Revenue Ledger",
   description:
-    "A transparent online course marketplace: browse and buy courses, teach with a 70/30 revenue split, track every sale in the instructor revenue ledger, approve payouts in the admin console. Bilingual EN/中文.",
-  keywords: ["online courses", "revenue ledger", "instructor payouts", "marketplace", "e-learning"],
+    "A transparent online course marketplace: browse and buy courses, teach with a 70/30 revenue split, track every sale in the instructor revenue ledger, approve payouts in the admin console. Multilingual interface — English, 中文, العربية, Français, Español, Deutsch, Português, Русский, 日本語， 한국어, Türkçe, हिन्दी.",
+  keywords: ["online courses", "revenue ledger", "instructor payouts", "marketplace", "e-learning", "multilingual"],
 };
 
 export default function RootLayout({

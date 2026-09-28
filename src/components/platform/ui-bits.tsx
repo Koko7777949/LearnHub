@@ -3,7 +3,7 @@
 import React from "react";
 import { cn } from "@/lib/utils";
 import { avatarGradient, initials } from "@/lib/format";
-import { useI18n, trLevel } from "@/lib/i18n";
+import { useI18n, trLevel, localeOf } from "@/lib/i18n";
 import { BookOpen, Clock, Star, TrendingUp } from "lucide-react";
 
 /* ---------- gradient avatar ---------- */
@@ -164,7 +164,7 @@ export function Rating({ value, count, className }: { value: number; count?: num
       <Star className="h-3.5 w-3.5 fill-amber-500 text-amber-500" />
       {typeof count === "number" && (
         <span className="text-muted-foreground">
-          ({count.toLocaleString(lang === "zh" ? "zh-CN" : "en-US")})
+          ({count.toLocaleString(localeOf(lang))})
         </span>
       )}
     </span>

@@ -27,7 +27,7 @@ import {
 import type { CourseWithInstructor, CouponValidation, CouponFailReason, CheckoutResult, StripeConfig, StripeCheckoutResponse } from "@/lib/types";
 
 export function CartView() {
-  const { t, lang } = useI18n();
+  const { t } = useI18n();
   const { cart, removeFromCart, clearCart, user, setView, openCourse } = useApp();
   const [couponInput, setCouponInput] = useState("");
   const [applied, setApplied] = useState<CouponValidation | null>(null);
@@ -459,9 +459,7 @@ export function CartView() {
 
             {user && user.role !== "STUDENT" && (
               <p className="mt-4 rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-700">
-                {lang === "zh"
-                  ? "当前账户为讲师/管理员，需以学生身份登录后结算。"
-                  : "You're signed in as instructor/admin — sign in as a student to check out."}
+                {t("cartNonStudentHint")}
               </p>
             )}
 
